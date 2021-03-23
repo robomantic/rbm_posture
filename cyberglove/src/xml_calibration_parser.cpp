@@ -277,12 +277,12 @@ namespace xml_calibration_parser
     // Comment translated from french: "does it work decreasing? Yes"
     float y = 0.0f;
     if (x1 - x0 == 0.0f )
-      {
-        ROS_WARN("Bad calibration: raw_calib[1] = raw_calib[0]");
-        return 0.0f;
-      }
+    {
+      ROS_WARN("Bad calibration: raw_calib[1] = raw_calib[0]");
+      return 0.0f;
+    }
 
-    y = y0 + (x-x0)* ((y1-y0)/(x1-x0));
+    y = y0 + (x - x0) * ((y1 - y0) / (x1 - x0));
     return y;
   }
 
@@ -295,16 +295,4 @@ namespace xml_calibration_parser
       return lookup_offset;
     return round(raw_position * lookup_precision);
   };
-
-  int XmlCalibrationParser::round(float number)
-  {
-    // we only have positive numbers
-    return static_cast<int>(floor(number + 0.5));
-  }
-
-
-  std::vector<XmlCalibrationParser::JointCalibration> XmlCalibrationParser::getJointsCalibrations()
-  {
-    return jointsCalibrations;
-  }
 }  // namespace xml_calibration_parser

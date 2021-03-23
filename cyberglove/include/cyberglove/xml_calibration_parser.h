@@ -68,8 +68,10 @@ class XmlCalibrationParser
     std::vector<Calibration> calibrations;
   };
 
-
-  std::vector<JointCalibration> getJointsCalibrations();
+  const std::vector<JointCalibration>& getJointsCalibrations()
+  {
+    return jointsCalibrations;
+  }
 
  protected:
   void parse_calibration_file(TiXmlNode* pParent);
@@ -100,7 +102,11 @@ class XmlCalibrationParser
    *
    * @return the float rounded to the closest int
    */
-  int round(float number);
+  inline int round(float number)
+  {
+      // we only have positive numbers
+      return static_cast<int>(floor(number + 0.5));
+  }
 
   /*
    * inline function to convert a raw position to a valid index for
