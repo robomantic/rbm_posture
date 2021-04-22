@@ -85,9 +85,7 @@ class XmlCalibrationParser
 
   int build_calibration_table();
 
-  std::vector<float> calibration_to_lookup_table(std::vector<Calibration> calib);
-
-  float compute_lookup_value(int index, std::vector<Calibration> calib);
+  float compute_lookup_value(int index, const std::vector<Calibration>& calib);
 
   float linear_interpolate(float x, float x0, float y0, float x1, float y1);
 

@@ -36,7 +36,8 @@
 
 #include <ros/ros.h>
 #include "cyberglove/xml_calibration_parser.h"
-#include <stdio.h>
+#include <cstdio>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -177,14 +178,14 @@ namespace xml_calibration_parser
     std::ostringstream ss;
     for (unsigned int index_calib = 0; index_calib < jointsCalibrations.size(); ++index_calib)
     {
-      std::string name = jointsCalibrations[index_calib].name;
+      const std::string& name = jointsCalibrations[index_calib].name;
       ROS_DEBUG_STREAM(name);
 
-      std::vector<Calibration> calib = jointsCalibrations[index_calib].calibrations;
+      const std::vector<Calibration>& calib = jointsCalibrations[index_calib].calibrations;
 
       std::vector<float> lookup_table(static_cast<int>(lookup_offset)*static_cast<int>(lookup_precision));
 
-      if (calib.size() < 2 )
+      if (calib.size() < 2)
   ROS_ERROR("Not enough points were defined to set up the calibration.");
 
       // order the calibration vector by ascending values of raw_value
@@ -193,7 +194,7 @@ namespace xml_calibration_parser
       ss << "lookup table : " << name;
 
       // setup the lookup table
-      for (unsigned int index_lookup=0; index_lookup < lookup_table.size(); ++index_lookup)
+      for (unsigned int index_lookup = 0; index_lookup < lookup_table.size(); ++index_lookup)
       {
         float value = compute_lookup_value(index_lookup, calib);
         ss << index_lookup << ":" << value << " ";
@@ -203,7 +204,7 @@ namespace xml_calibration_parser
       ss << std::endl;
 
       // add the values to the map
-      joints_calibrations_map[name] = lookup_table;
+      joints_calibrations_map[name] = std::move(lookup_table);
       // joints_calibrations_map.insert(std::pair <std::string, std::vector<float> >(name, lookup_table));
     }
     ROS_DEBUG_STREAM(ss.str());
@@ -221,7 +222,7 @@ namespace xml_calibration_parser
    *
    * @return the value to be stored in the lookup table
    */
-  float XmlCalibrationParser::compute_lookup_value(int index, std::vector<XmlCalibrationParser::Calibration> calib)
+  float XmlCalibrationParser::compute_lookup_value(int index, const std::vector<XmlCalibrationParser::Calibration>& calib)
   {
     float raw_pos = return_raw_position_from_index(index);
 
