@@ -34,7 +34,6 @@
 
 //own .h
 #include "sr_remappers/humanhand_to_cyberglove_remapper.h"
-#include <sr_robot_msgs/joint.h>
 #include <sensor_msgs/JointState.h>
 
 using namespace ros;

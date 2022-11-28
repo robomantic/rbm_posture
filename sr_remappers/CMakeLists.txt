@@ -10,8 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
-  sr_robot_msgs
-  cyberglove
 )
 
 ## System dependencies are found with CMake's conventions
@@ -68,7 +66,7 @@ roslint_python()
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES sr_remappers
-CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs sr_robot_msgs cyberglove
+CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs sr_cyberglove_config
 #  DEPENDS system_lib
 )
 

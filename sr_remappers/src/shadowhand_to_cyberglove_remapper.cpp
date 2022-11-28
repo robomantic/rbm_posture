@@ -18,9 +18,8 @@
 * You should have received a copy of the GNU General Public License along
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-* @brief This program remapps the force information contained in
-* /joint_states coming from the hand to the /cybergraspforces topic
-* used to control the cybergrasp.
+* @brief This program remaps the posture information contained in
+* calibrated/joint_states coming from the hand to the /remapped/joint_states topic
 *
 *
 */
@@ -29,8 +28,6 @@
 #include <string>
 #include <vector>
 #include "sr_remappers/shadowhand_to_cyberglove_remapper.h"
-#include <sr_robot_msgs/sendupdate.h>
-#include <sr_robot_msgs/joint.h>
 #include <sensor_msgs/JointState.h>
 
 namespace shadowhand_to_cyberglove_remapper
@@ -72,11 +69,6 @@ ShadowhandToCybergloveRemapper::ShadowhandToCybergloveRemapper() :
     cyberglove_jointstates_sub = node.subscribe(full_topic, 10, &ShadowhandToCybergloveRemapper::jointstatesCallback,
       this);
 
-    n_tilde.searchParam("sendupdate_prefix", searched_param);
-    n_tilde.param(searched_param, prefix, std::string());
-    full_topic = prefix + "sendupdate";
-
-    shadowhand_pub = node.advertise<sr_robot_msgs::sendupdate> (full_topic, 5);
     js_pub = node.advertise<sensor_msgs::JointState> (remapped_full_topic, 5);
 }
 
@@ -109,33 +101,19 @@ void ShadowhandToCybergloveRemapper::init_names()
 
 void ShadowhandToCybergloveRemapper::jointstatesCallback(const sensor_msgs::JointStateConstPtr& msg)
 {
-    sr_robot_msgs::joint joint;
-    sr_robot_msgs::sendupdate pub;
-
     // Do conversion
     std::vector<double> vect = calibration_parser->get_remapped_vector(msg->position);
 
     // Process J4's
     getAbductionJoints(msg, vect);
 
-    // Generate sendupdate message
-    pub.sendupdate_length = number_hand_joints;
-
-    std::vector<sr_robot_msgs::joint> table(number_hand_joints);
+    // Generate js message
     for (unsigned int i = 0; i < number_hand_joints; ++i )
     {
-        joint.joint_name = joints_names[i];
-        joint.joint_target = vect[i];
-        table[i] = joint;
         js_msg.position[i] = vect[i] / 180.0 * M_PI; //radians in joint_states
     }
-    pub.sendupdate_length = number_hand_joints;
-    pub.sendupdate_list = table;
     
-    //Generate sendupdate message
     js_msg.header.stamp = ros::Time::now();
-    
-    shadowhand_pub.publish(pub);
     js_pub.publish(js_msg);
 }
 
