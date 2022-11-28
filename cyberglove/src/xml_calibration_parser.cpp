@@ -183,7 +183,7 @@ namespace xml_calibration_parser
 
       const std::vector<Calibration>& calib = jointsCalibrations[index_calib].calibrations;
 
-      std::vector<float> lookup_table(static_cast<int>(lookup_offset)*static_cast<int>(lookup_precision));
+      std::vector<float> lookup_table(static_cast<int>(lookup_offset * lookup_precision));
 
       if (calib.size() < 2)
   ROS_ERROR("Not enough points were defined to set up the calibration.");
@@ -191,13 +191,13 @@ namespace xml_calibration_parser
       // order the calibration vector by ascending values of raw_value
       //      ROS_ERROR("TODO: calibration vector not ordered yet");
 
-      ss << "lookup table : " << name;
+      ss << "lookup table : " << name << "\n";
 
       // setup the lookup table
       for (unsigned int index_lookup = 0; index_lookup < lookup_table.size(); ++index_lookup)
       {
         float value = compute_lookup_value(index_lookup, calib);
-        ss << index_lookup << ":" << value << " ";
+        ss << (int)(index_lookup / lookup_precision) << ":" << value << " ";
         lookup_table[index_lookup] = value;
       }
 
@@ -292,8 +292,8 @@ namespace xml_calibration_parser
   {
     if (raw_position < 0.0f)
       return 0;
-    if (raw_position > lookup_offset)
-      return lookup_offset;
+    if (raw_position >= lookup_offset)
+      return (lookup_offset * lookup_precision) - 1;
     return round(raw_position * lookup_precision);
   };
 }  // namespace xml_calibration_parser
