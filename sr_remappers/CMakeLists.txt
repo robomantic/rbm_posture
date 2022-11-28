@@ -66,7 +66,7 @@ roslint_python()
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES sr_remappers
-CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs sr_cyberglove_config
+CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs
 #  DEPENDS system_lib
 )
 

@@ -12,7 +12,7 @@
 -->
 
 <launch>
-  <arg name="mapping" default="$(find sr_cyberglove_config)/mappings/GloveToHandMappings_generic"/>
+  <arg name="mapping" default=""/>
   <arg name="transposed" default="true"/>
 
   <!-- shadowhand to cybergrasp remapper -->
