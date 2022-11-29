@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+ Copyright (c) 2022, Robomantic, Bielefeld University, CITEC
  Copyright 2022 Shadow Robot Company Ltd.
  This program is free software: you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -13,11 +14,12 @@
 -->
 <package>
   <name>cyberglove</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>This is a generic ROS interface to the Cyberglove from Immersion. It reads data from the Cyberglove, calibrate them and streams them to two different /joint_states topic: calibrated and raw data.</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <maintainer email="software@shadowrobot.com">Shadow Robot's software team</maintainer>
+  <maintainer email="gwalck@techfak.uni-bielefeld.de">Guillaume Walck</maintainer>
+  
+  <author email="software@shadowrobot.com">Shadow Robot's software team</author>
 
   <license>GPL</license>
 
