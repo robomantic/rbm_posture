@@ -6,15 +6,24 @@ project(sr_remappers)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslint
   rospy
   std_msgs
   sensor_msgs
   sr_robot_msgs
-  trajectory_msgs
+  cyberglove
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED system filesystem date_time thread)
+
+roslint_cpp()
+roslint_python()
+
+## Uncomment this if the package has a setup.py. This macro ensures
+## modules and global scripts declared therein get installed
+## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
+# catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -59,7 +68,7 @@ find_package(Boost REQUIRED system filesystem date_time thread)
 catkin_package(
 INCLUDE_DIRS include
 LIBRARIES sr_remappers
-CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs sr_robot_msgs trajectory_msgs sr_cyberglove_config
+CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs sr_robot_msgs cyberglove
 #  DEPENDS system_lib
 )
 
@@ -136,13 +145,14 @@ target_link_libraries(cyberglove_human_remapper
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-install(TARGETS ${PROJECT_NAME} cyberglove_remapper cyberglove_human_remapper
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(TARGETS sr_remappers cyberglove_remapper cyberglove_human_remapper
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(FILES include/${PROJECT_NAME}/calibration_parser.h
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/
+install(DIRECTORY include/sr_remappers/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
 install(DIRECTORY launch/

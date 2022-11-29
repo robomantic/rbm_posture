@@ -1,4 +1,4 @@
-/**
+/*
 * @file   calibration_parser.h
 * @author Ugo Cupcic <ugo@shadowrobot.com>, Contact <contact@shadowrobot.com>
 * @date   Thu May 13 09:44:52 2010
@@ -8,39 +8,36 @@
 *
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the Free
-* Software Foundation, either version 2 of the License, or (at your option)
-* any later version.
+* Software Foundation version 2 of the License.
 *
 * This program is distributed in the hope that it will be useful, but WITHOUT
 * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program.  If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 * @brief This is where the calibration matrix is read from a file, stored and where the actual mapping take place.
 *
 *
 */
 
-#ifndef   	CALIBRATION_PARSER_H_
-# define   	CALIBRATION_PARSER_H_
+#ifndef SR_REMAPPERS_CALIBRATION_PARSER_H_
+#define SR_REMAPPERS_CALIBRATION_PARSER_H_
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-using namespace std;
-
-/**
+/*
 * This is where the calibration matrix is read from a file, stored and where the actual mapping take place.
 */
-class CalibrationParser {
+class CalibrationParser
+{
 public:
-
-  /**
+  /*
   * Default constructor, using the default path. Initialize a
   * calibration matrix loaded from the default calibration file.
   * transposed is default to keep backward compatibility even if not natural
@@ -48,17 +45,17 @@ public:
   */
   CalibrationParser(bool transpose=true);
 
-  /**
+  /*
   * Constructor initializing a calibration matrix loaded from the
   * given calibration file.
   * transposed is default to keep backward compatibility even if not natural
   *
   * @param path the path to the calibration file
   */
-  CalibrationParser(std::string path, bool transpose=true);
-  ~CalibrationParser(){};
+  explicit CalibrationParser(std::string path, bool transpose=true);
+  ~CalibrationParser() {}
 
-  /**
+  /*
   * multiplies the vector by the mapping matrix
   *
   * @param vector vector to be mapped
@@ -69,9 +66,9 @@ public:
 
 private:
   bool transpose_;
-  static const std::string default_path;
+  static const char* default_path;
 
-  /**
+  /*
   * Open the given file and parses it into a matrix
   *
   * @param path path of the calibration file
@@ -92,7 +89,7 @@ private:
     } 
     return x;
   }
-}; // end class
+};  // end class
 
 
-#endif 	    /* !CALIBRATION_PARSER_H_ */
+#endif  // SR_REMAPPERS_CALIBRATION_PARSER_H_

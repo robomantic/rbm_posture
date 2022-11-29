@@ -1,61 +1,58 @@
-/**
- * @file   xml_calibration_parser.h
- * @author Ugo Cupcic <ugo@shadowrobot.com>
- * @date   Tue Apr 27 11:30:41 2010
- *
+/*
+* @file   xml_calibration_parser.h
+* @author Ugo Cupcic <ugo@shadowrobot.com>
+* @date   Tue Apr 27 11:30:41 2010
+*
 *
 * Copyright 2011 Shadow Robot Company Ltd.
 *
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the Free
-* Software Foundation, either version 2 of the License, or (at your option)
-* any later version.
+* Software Foundation version 2 of the License.
 *
 * This program is distributed in the hope that it will be useful, but WITHOUT
 * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program.  If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 *
- * @brief  This is a simple xml parser, used to parse the calibration
- * file for the cyberglove.
- * A Calibration file must have this format:
- * <Cyberglove_calibration>
- *   <Joint name="G_ThumbRotate">
- *     <calib raw_value="0.0" calibrated_value="-60"/>
- *     <calib raw_value="0.42" calibrated_value="100"/>
- *   </Joint>
- * </Cyberglove_calibration>
- *
- * The calibration will be used by the glove node to stream coherent
- * angles (and not an uncalibrated sensor value between 0 and 1).
- *
- *
- */
+* @brief  This is a simple xml parser, used to parse the calibration
+* file for the cyberglove.
+* A Calibration file must have this format:
+* <Cyberglove_calibration>
+*   <Joint name="G_ThumbRotate">
+*     <calib raw_value="0.0" calibrated_value="-60"/>
+*     <calib raw_value="0.42" calibrated_value="100"/>
+*   </Joint>
+* </Cyberglove_calibration>
+*
+* The calibration will be used by the glove node to stream coherent
+* angles (and not an uncalibrated sensor value between 0 and 1).
+*
+*
+*/
 
-#ifndef XML_CALIBRATION_PARSER_H
-#define XML_CALIBRATION_PARSER_H
+
+#ifndef CYBERGLOVE_XML_CALIBRATION_PARSER_H_
+#define CYBERGLOVE_XML_CALIBRATION_PARSER_H_
 
 // xml parser library
 #include <tinyxml.h>
-
-// generic C/C++ include
-#include <map>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace xml_calibration_parser
 {
+
 class XmlCalibrationParser
 {
-public:
-  XmlCalibrationParser()
-  {};
+ public:
+  XmlCalibrationParser() {}
   explicit XmlCalibrationParser(std::string path_to_calibration);
-  ~XmlCalibrationParser()
-  {};
+  ~XmlCalibrationParser() {}
 
   float get_calibration_value(float position, std::string joint_name);
 
@@ -71,9 +68,10 @@ public:
     std::vector<Calibration> calibrations;
   };
 
+
   std::vector<JointCalibration> getJointsCalibrations();
 
-protected:
+ protected:
   void parse_calibration_file(TiXmlNode* pParent);
   std::vector<Calibration> parse_joint_attributes(TiXmlNode* pParent);
 
@@ -95,7 +93,7 @@ protected:
   static const float lookup_precision;
   static const float lookup_offset;
 
-  /**
+  /*
    * rounds the given number
    *
    * @param number a float
@@ -104,7 +102,7 @@ protected:
    */
   int round(float number);
 
-  /**
+  /*
    * inline function to convert a raw position to a valid index for
    * our lookup table
    *
@@ -114,7 +112,7 @@ protected:
    */
   int return_index_from_raw_position(float raw_position);
 
-  /**
+  /*
    * inline function to convert an index of our lookup table to a raw
    * position.
    *
@@ -124,9 +122,9 @@ protected:
    */
   static inline float return_raw_position_from_index(int lookup_index)
   {
-    return static_cast<float>(lookup_index) / lookup_precision;
+    return (static_cast<float>(lookup_index)) / lookup_precision;
   };
 };  // end class XmlCalibrationParser
 
 }  // namespace xml_calibration_parser
-#endif  // XML_CALIBRATION_PARSER_H
+#endif  // CYBERGLOVE_XML_CALIBRATION_PARSER_H_

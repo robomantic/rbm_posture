@@ -1,42 +1,41 @@
-/**
- * @file   cyberglove_publisher.h
- * @author Ugo Cupcic <ugo@shadowrobot.com>, Contact <contact@shadowrobot.com>
- * @date   Thu Apr 22 10:25:55 2010
- *
+/*
+* @file   cyberglove_publisher.h
+* @author Ugo Cupcic <ugo@shadowrobot.com>, Contact <contact@shadowrobot.com>
+* @date   Thu Apr 22 10:25:55 2010
+*
 *
 * Copyright 2011 Shadow Robot Company Ltd.
 *
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the Free
-* Software Foundation, either version 2 of the License, or (at your option)
-* any later version.
+* Software Foundation version 2 of the License.
 *
 * This program is distributed in the hope that it will be useful, but WITHOUT
 * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program.  If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 *
- * @brief The goal of this ROS publisher is to publish raw and calibrated
- * joint positions from the cyberglove at a regular time interval. We're
- * oversampling to get a better accuracy on our data.
- * To publish those data, just call the publish()
- * function.
- *
- *
- */
+* @brief The goal of this ROS publisher is to publish raw and calibrated
+* joint positions from the cyberglove at a regular time interval. We're
+* oversampling to get a better accuracy on our data.
+* To publish those data, just call the publish()
+* function.
+*
+*
+*/
 
-#ifndef CYBERGLOVE_PUBLISHER_H
-#define CYBERGLOVE_PUBLISHER_H
+#ifndef CYBERGLOVE_CYBERGLOVE_PUBLISHER_H_
+#define CYBERGLOVE_CYBERGLOVE_PUBLISHER_H_
 
 #include <ros/ros.h>
-#include <boost/smart_ptr.hpp>
 #include <string>
 #include <vector>
+#include <boost/smart_ptr.hpp>
 
-#include "cyberglove/serial_glove.hpp"
+#include "cyberglove/serial_glove.h"
 
 // messages
 #include <sensor_msgs/JointState.h>
@@ -44,6 +43,7 @@
 
 namespace cyberglove
 {
+
 class CyberglovePublisher
 {
 public:
@@ -57,7 +57,6 @@ public:
   void initialize_calibration(std::string path_to_calibration);
   bool isPublishing();
   void setPublishing(bool value);
-
 private:
   /////////////////
   //  CALLBACKS  //
@@ -67,10 +66,10 @@ private:
   ros::NodeHandle node, n_tilde;
   unsigned int publish_counter_max, publish_counter_index;
 
-  /// the actual connection with the cyberglove is done here.
+  // the actual connection with the cyberglove is done here.
   boost::shared_ptr<CybergloveSerial> serial_glove;
 
-  /**
+  /*
    * The callback function: called each time a full message
    * is received. This function is bound to the serial_glove
    * object using boost::bind.
@@ -83,7 +82,7 @@ private:
   std::string path_to_glove;
   bool publishing;
 
-  /// the calibration parser
+  // the calibration parser
   xml_calibration_parser::XmlCalibrationParser calibration_parser;
 
   ros::Publisher cyberglove_raw_pub;
@@ -103,7 +102,8 @@ private:
 };  // end class CyberglovePublisher
 
 }  // namespace cyberglove
-#endif  // CYBERGLOVE_PUBLISHER_H
+
+#endif  // CYBERGLOVE_CYBERGLOVE_PUBLISHER_H_
 
 /* For the emacs weenies in the crowd.
 Local Variables:

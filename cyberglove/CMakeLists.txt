@@ -6,6 +6,7 @@ project(cyberglove)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roslib
+  roslint
   roscpp
   rospy
   std_msgs
@@ -18,6 +19,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED system filesystem date_time thread)
+
+roslint_cpp()
+roslint_python()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -161,8 +165,9 @@ target_link_libraries(cyberglove_recalib_node
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 install(TARGETS cyberglove cyberglove_node cyberglove_recalib_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/

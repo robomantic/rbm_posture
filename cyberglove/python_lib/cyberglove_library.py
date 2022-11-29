@@ -1,31 +1,34 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-# Copyright 2011 Shadow Robot Company Ltd.
+# Copyright 2011, 2022 Shadow Robot Company Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 2 of the License, or (at your option)
-# any later version.
+# Software Foundation version 2 of the License.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 # more details.
 #
 # You should have received a copy of the GNU General Public License along
-# with this program.  If not, see <http://www.gnu.org/licenses/>.
+# with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import roslib; roslib.load_manifest('cyberglove')
 
-import time
-import os
-import math
-import rospy
-import subprocess
+# pylint: disable-all
+
+from __future__ import absolute_import, division
+
 import threading
+import time
+
 import rosgraph.masterapi
-from sr_robot_msgs.msg import sendupdate, joint, joints_data
-from sensor_msgs.msg import *
+import roslib
+import rospy
+from sensor_msgs.msg import JointState
+
+roslib.load_manifest('cyberglove')
+
 
 class Joint():
     def __init__(self, name="", motor="", min=0, max=90):
@@ -34,33 +37,34 @@ class Joint():
         self.min = min
         self.max = max
 
+
 class Cyberglove:
     """
     Interface to the Cyberglove publisher.
     """
-    def __init__(self, max_values = 2):
-        self.joints = { "G_ThumbRotate": Joint(),
-                        "G_ThumbMPJ": Joint(),
-                        "G_ThumbIJ": Joint(),
-                        "G_ThumbAb": Joint(),
-                        "G_IndexMPJ": Joint(),
-                        "G_IndexPIJ": Joint(),
-                        "G_IndexDIJ": Joint(),
-                        "G_MiddleMPJ": Joint(),
-                        "G_MiddlePIJ": Joint(),
-                        "G_MiddleDIJ": Joint(),
-                        "G_MiddleIndexAb": Joint(),
-                        "G_RingMPJ": Joint(),
-                        "G_RingPIJ": Joint(),
-                        "G_RingDIJ": Joint(),
-                        "G_RingMiddleAb": Joint(),
-                        "G_PinkieMPJ": Joint(),
-                        "G_PinkiePIJ": Joint(),
-                        "G_PinkieDIJ": Joint(),
-                        "G_PinkieRingAb": Joint(),
-                        "G_PalmArch": Joint(),
-                        "G_WristPitch": Joint(),
-                        "G_WristYaw": Joint() }
+    def __init__(self, max_values=2):
+        self.joints = {"G_ThumbRotate": Joint(),
+                       "G_ThumbMPJ": Joint(),
+                       "G_ThumbIJ": Joint(),
+                       "G_ThumbAb": Joint(),
+                       "G_IndexMPJ": Joint(),
+                       "G_IndexPIJ": Joint(),
+                       "G_IndexDIJ": Joint(),
+                       "G_MiddleMPJ": Joint(),
+                       "G_MiddlePIJ": Joint(),
+                       "G_MiddleDIJ": Joint(),
+                       "G_MiddleIndexAb": Joint(),
+                       "G_RingMPJ": Joint(),
+                       "G_RingPIJ": Joint(),
+                       "G_RingDIJ": Joint(),
+                       "G_RingMiddleAb": Joint(),
+                       "G_PinkieMPJ": Joint(),
+                       "G_PinkiePIJ": Joint(),
+                       "G_PinkieDIJ": Joint(),
+                       "G_PinkieRingAb": Joint(),
+                       "G_PalmArch": Joint(),
+                       "G_WristPitch": Joint(),
+                       "G_WristYaw": Joint()}
 
         self.raw_messages = []
         self.calibrated_messages = []
@@ -69,8 +73,8 @@ class Cyberglove:
         self.hasglove = 0
         self.isFirstMessage = True
         self.liste = 0
-        self.raw = rospy.Subscriber('/cyberglove/raw/joint_states',JointState,self.callback_raw)
-        self.calibrated = rospy.Subscriber('/cyberglove/calibrated/joint_states',JointState,self.callback_calibrated)
+        self.raw = rospy.Subscriber('/cyberglove/raw/joint_states', JointState, self.callback_raw)
+        self.calibrated = rospy.Subscriber('/cyberglove/calibrated/joint_states', JointState, self.callback_calibrated)
         threading.Thread(None, rospy.spin)
         if self.has_glove():
             time.sleep(1.0)
@@ -118,7 +122,7 @@ class Cyberglove:
 
         @param joint_name: the name of the glove of the Cyberglove
         """
-        raw_value =  0
+        raw_value = 0
         joint_index = self.map[joint_name]
         for index in range(0, len(self.raw_messages)):
             raw_value = raw_value + self.raw_messages[index].position[joint_index]
@@ -151,7 +155,7 @@ class Cyberglove:
 
         @return: the joints names array
         """
-        return self.joints.keys()
+        return list(self.joints.keys())
 
     def has_glove(self):
         """
@@ -163,8 +167,8 @@ class Cyberglove:
         if self.liste == 0:
             master = rosgraph.masterapi.Master('/rostopic')
             self.liste = master.getPublishedTopics('/')
-        for topic_typ in self.liste :
+        for topic_typ in self.liste:
             for topic in topic_typ:
-                if '/cyberglove' in topic :
+                if '/cyberglove' in topic:
                     self.hasglove = True
         return self.hasglove
