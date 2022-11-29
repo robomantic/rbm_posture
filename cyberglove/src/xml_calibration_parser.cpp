@@ -44,8 +44,8 @@
 namespace xml_calibration_parser
 {
 
-  const float XmlCalibrationParser::lookup_precision = 1000.0f;
-  const float XmlCalibrationParser::lookup_offset = 1.0f;
+  const float XmlCalibrationParser::lookup_precision = 1.0f;
+  const float XmlCalibrationParser::lookup_offset = 4096.0f;
 
   /*
    * The constructor: parses the given file and stores the calibration

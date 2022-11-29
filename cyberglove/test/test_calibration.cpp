@@ -42,13 +42,13 @@ xml_calibration_parser::XmlCalibrationParser calib_parser;
 TEST(LookupTable, testSimple)
 {
   float valtmp;
-  valtmp = calib_parser.get_calibration_value(0.05f, "test1");
+  valtmp = calib_parser.get_calibration_value(50.0f, "test1");
   EXPECT_TRUE(fabs(valtmp - 50.0f) < epsilon)
     << "Expected value : 50 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.1f, "test1");
-  EXPECT_TRUE(fabs(valtmp - 100.0f) < epsilon)
+  valtmp = calib_parser.get_calibration_value(200.0f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 200.0f) < epsilon)
     << "Expected value : 100 "
     << "Received value : "<< valtmp;
 
@@ -57,22 +57,22 @@ TEST(LookupTable, testSimple)
     << "Expected value : 0 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(1.0f, "test1");
-  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+  valtmp = calib_parser.get_calibration_value(4096.0f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 4095.0f) < epsilon)
     << "Expected value : 999 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.999f, "test1");
-  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+  valtmp = calib_parser.get_calibration_value(4095.0f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 4095.0f) < epsilon)
     << "Expected value : 999 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(1.1f, "test1");
-  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+  valtmp = calib_parser.get_calibration_value(4097.0f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 4095.0f) < epsilon)
     << "Expected value : 999 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.2f, "test1");
+  valtmp = calib_parser.get_calibration_value(200.0f, "test1");
   EXPECT_TRUE(fabs(valtmp - 200.0f) < epsilon)
     << "Expected value : 200 "
     << "Received value : "<< valtmp;
@@ -93,12 +93,12 @@ TEST(LookupTable, integrity)
 TEST(LookupTable, testCalibNotStartingAtZero)
 {
   float valtmp;
-  valtmp = calib_parser.get_calibration_value(0.05f, "test2");
+  valtmp = calib_parser.get_calibration_value(50.0f, "test2");
   EXPECT_TRUE(fabs(valtmp - 35.0f) < epsilon)
     << "Expected value : 35 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.1f, "test2");
+  valtmp = calib_parser.get_calibration_value(100.0f, "test2");
   EXPECT_TRUE(fabs(valtmp - 60.0f) < epsilon)
     << "Expected value : 60 "
     << "Received value : "<< valtmp;
@@ -108,55 +108,55 @@ TEST(LookupTable, testCalibNotStartingAtZero)
     << "Expected value : 10 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.2f, "test2");
+  valtmp = calib_parser.get_calibration_value(200.0f, "test2");
   EXPECT_TRUE(fabs(valtmp - 110.0f) < epsilon)
     << "Expected value : 110 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(1.0f, "test2");
-  EXPECT_TRUE(fabs(valtmp - 509.5f) < epsilon)
-    << "Expected value : 509.5 "
+  valtmp = calib_parser.get_calibration_value(4096.0f, "test2");
+  EXPECT_TRUE(fabs(valtmp - 2057.5f) < epsilon)
+    << "Expected value : 2057.5 "
     << "Received value : "<< valtmp;
 }
 
 TEST(LookupTable, testRawNotStartingAtZero)
 {
   float valtmp;
-  valtmp = calib_parser.get_calibration_value(0.15f, "test3");
+  valtmp = calib_parser.get_calibration_value(150.0f, "test3");
   EXPECT_TRUE(fabs(valtmp - 35.0f) < epsilon)
     << "Expected value : 35 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.2f, "test3");
+  valtmp = calib_parser.get_calibration_value(200.0f, "test3");
   EXPECT_TRUE(fabs(valtmp - 60.0f) < epsilon)
     << "Expected value : 60 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.1f, "test3");
+  valtmp = calib_parser.get_calibration_value(100.0f, "test3");
   EXPECT_TRUE(fabs(valtmp - 10.0f) < epsilon)
     << "Expected value : 10 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.3f, "test3");
+  valtmp = calib_parser.get_calibration_value(300.0f, "test3");
   EXPECT_TRUE(fabs(valtmp - 110.0f) < epsilon)
     << "Expected value : 110 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(1.0f, "test3");
-  EXPECT_TRUE(fabs(valtmp - 459.5f) < epsilon)
-    << "Expected value : 459.5 "
+  valtmp = calib_parser.get_calibration_value(4096.0f, "test3");
+  EXPECT_TRUE(fabs(valtmp - 2007.5f) < epsilon)
+    << "Expected value : 2007.5 "
     << "Received value : "<< valtmp;
 }
 
 TEST(LookupTable, tableNotOrdered)
 {
   float valtmp;
-  valtmp = calib_parser.get_calibration_value(0.05f, "test4");
+  valtmp = calib_parser.get_calibration_value(50.0f, "test4");
   EXPECT_TRUE(fabs(valtmp - 35.0f) < epsilon)
     << "Expected value : 35 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.1f, "test4");
+  valtmp = calib_parser.get_calibration_value(100.0f, "test4");
   EXPECT_TRUE(fabs(valtmp - 10.0f) < epsilon)
     << "Expected value : 10 "
     << "Received value : "<< valtmp;
@@ -166,14 +166,14 @@ TEST(LookupTable, tableNotOrdered)
     << "Expected value : 60 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(0.2f, "test4");
+  valtmp = calib_parser.get_calibration_value(200.0f, "test4");
   EXPECT_TRUE(fabs(valtmp + 40.0f) < epsilon)
     << "Expected value : -40 "
     << "Received value : "<< valtmp;
 
-  valtmp = calib_parser.get_calibration_value(1.0f, "test4");
-  EXPECT_TRUE(fabs(valtmp + 439.5f) < epsilon)
-    << "Expected value : -439.5 "
+  valtmp = calib_parser.get_calibration_value(4096.0f, "test4");
+  EXPECT_TRUE(fabs(valtmp + 1987.5f) < epsilon)
+    << "Expected value : -1987.5 "
     << "Received value : "<< valtmp;
 }
 
