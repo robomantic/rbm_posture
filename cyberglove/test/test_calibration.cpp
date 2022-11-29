@@ -57,6 +57,21 @@ TEST(LookupTable, testSimple)
     << "Expected value : 0 "
     << "Received value : "<< valtmp;
 
+  valtmp = calib_parser.get_calibration_value(1.0f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+    << "Expected value : 999 "
+    << "Received value : "<< valtmp;
+
+  valtmp = calib_parser.get_calibration_value(0.999f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+    << "Expected value : 999 "
+    << "Received value : "<< valtmp;
+
+  valtmp = calib_parser.get_calibration_value(1.1f, "test1");
+  EXPECT_TRUE(fabs(valtmp - 999.0f) < epsilon)
+    << "Expected value : 999 "
+    << "Received value : "<< valtmp;
+
   valtmp = calib_parser.get_calibration_value(0.2f, "test1");
   EXPECT_TRUE(fabs(valtmp - 200.0f) < epsilon)
     << "Expected value : 200 "
@@ -97,6 +112,11 @@ TEST(LookupTable, testCalibNotStartingAtZero)
   EXPECT_TRUE(fabs(valtmp - 110.0f) < epsilon)
     << "Expected value : 110 "
     << "Received value : "<< valtmp;
+
+  valtmp = calib_parser.get_calibration_value(1.0f, "test2");
+  EXPECT_TRUE(fabs(valtmp - 509.5f) < epsilon)
+    << "Expected value : 509.5 "
+    << "Received value : "<< valtmp;
 }
 
 TEST(LookupTable, testRawNotStartingAtZero)
@@ -121,6 +141,11 @@ TEST(LookupTable, testRawNotStartingAtZero)
   EXPECT_TRUE(fabs(valtmp - 110.0f) < epsilon)
     << "Expected value : 110 "
     << "Received value : "<< valtmp;
+
+  valtmp = calib_parser.get_calibration_value(1.0f, "test3");
+  EXPECT_TRUE(fabs(valtmp - 459.5f) < epsilon)
+    << "Expected value : 459.5 "
+    << "Received value : "<< valtmp;
 }
 
 TEST(LookupTable, tableNotOrdered)
@@ -144,6 +169,11 @@ TEST(LookupTable, tableNotOrdered)
   valtmp = calib_parser.get_calibration_value(0.2f, "test4");
   EXPECT_TRUE(fabs(valtmp + 40.0f) < epsilon)
     << "Expected value : -40 "
+    << "Received value : "<< valtmp;
+
+  valtmp = calib_parser.get_calibration_value(1.0f, "test4");
+  EXPECT_TRUE(fabs(valtmp + 439.5f) < epsilon)
+    << "Expected value : -439.5 "
     << "Received value : "<< valtmp;
 }
 
