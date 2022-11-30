@@ -34,8 +34,8 @@ from QtWidgets import *
 
 # from cyberglove_generic_plugin import CybergloveGenericPlugin
 
-from cyberglove_calibrer import *
-from cyberglove_mapper import *
+from sr_gui_cyberglove_calibrator.cyberglove_calibrer import *
+from sr_gui_cyberglove_calibrator.cyberglove_mapper import *
 # from cyberglove_library import Cyberglove
 
 rootPath = os.path.join(
@@ -313,7 +313,7 @@ class SrGuiCybergloveCalibrator(Plugin):
             self.nb_sensors = 22
 
         self.calibrer = CybergloveCalibrer(description_function=None, nb_sensors=self.nb_sensors)
-        self.joint_names = self.calibrer.cyberglove.joints.keys()
+        self.joint_names = list(self.calibrer.cyberglove.joints.keys())
         self.joint_names.sort()
 
         self.layout = self._widget.layout

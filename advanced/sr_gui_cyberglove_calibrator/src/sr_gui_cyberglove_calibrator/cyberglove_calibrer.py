@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-# Copyright 2011 Shadow Robot Company Ltd.
+# Copyright 2011, 2022 Shadow Robot Company Ltd.
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -14,23 +14,28 @@
 # You should have received a copy of the GNU General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+
+# pylint: disable-all
+
 """
 Calibration utility for the cyberglove.
 
 @author: Ugo Cupcic
 @contact: ugo@shadowrobot.com, contact@shadowrobot.com
 """
-import roslib
-# roslib.load_manifest('sr_control_gui')
+
+from __future__ import absolute_import
 
 import os
-from cyberglove_library import Cyberglove
-from std_srvs.srv import Empty
+from builtins import input
 
-import yaml
-
+import roslib
 import rospy
+from cyberglove.srv import Calibration as CalibrationSrv
+from sr_gui_cyberglove_calibrator.cyberglove_library import Cyberglove
+# from std_srvs.srv import Empty
 
+# import yaml
 
 class Joint:
 
@@ -92,9 +97,9 @@ def default_description(step_name, max=0):
     @param max: if 0=>we're reading the min values, if 1=> max values
     """
     if max == 0:
-        print "calibrating min values for: " + str(step_name)
+        print(f"calibrating min values for: {step_name}")
     else:
-        print "calibrating max values for: " + str(step_name)
+        print(f"calibrating max values for: {step_name}")
 
 
 def do_nothing(step_name, max=0):
@@ -205,14 +210,12 @@ class CybergloveCalibrer:
         """
         joints = self.calibration_steps[index].joints
         # display the description
-        self.description_function(
-            self.calibration_steps[index].step_description[0], 0)
+        self.description_function(self.calibration_steps[index].step_description[0], 0)
 
         for joint in joints:
             name = joint.name
             # read the min values
-            self.joints[
-                name].raw_min = self.cyberglove.read_raw_average_value(name)
+            self.joints[name].raw_min = self.cyberglove.read_raw_average_value(name)
             self.joints[name].calibrated_min = joint.min
             # still needs to read the max before fully calibrated
             self.joints[name].is_calibrated += 0.5
@@ -228,14 +231,12 @@ class CybergloveCalibrer:
         """
         joints = self.calibration_steps[index].joints
         # display the description
-        self.description_function(
-            self.calibration_steps[index].step_description[1], 0)
+        self.description_function(self.calibration_steps[index].step_description[1], 0)
 
         for joint in joints:
             name = joint.name
             # read the max values
-            self.joints[
-                name].raw_max = self.cyberglove.read_raw_average_value(name)
+            self.joints[name].raw_max = self.cyberglove.read_raw_average_value(name)
             self.joints[name].calibrated_max = joint.max
             # still needs to read the max before fully calibrated
             self.joints[name].is_calibrated += 0.5
@@ -322,20 +323,31 @@ class CybergloveCalibrer:
         # store the text in a table
 
         text = []
-        text.append("{'cyberglove_calibration': [")
+        # text.append("{'cyberglove_calibration': [")
 
+        text.append("<?xml version=\"1.0\" ?>")
+        text.append("<Cyberglove_calibration>")
         for name in self.joints:
             cal = self.joints[name]
-            text.append("['%s', [[%f,%f],[%f,%f]]]," % (
-                name, cal.raw_min, cal.calibrated_min, cal.raw_max, cal.calibrated_max))
+            # min value
+            text.append("<calib raw_value=\""+str(cal.raw_min) + "\" calibrated_value=\"" +
+                        str(cal.calibrated_min)+"\"/>")
+            # text.append("['%s', [[%f,%f],[%f,%f]]]," % (
+            #    name, cal.raw_min, cal.calibrated_min, cal.raw_max, cal.calibrated_max))
 
-        text.append("]}")
+            # max value
+            text.append("<calib raw_value=\""+str(cal.raw_max) + "\" calibrated_value=\"" +
+                        str(cal.calibrated_max)+"\"/>")
+
+            text.append("</Joint>")
+
+        text.append("</Cyberglove_calibration>")
+        # text.append("]}")
 
         # write the text to a file
         try:
 
             output = open(filepath, "w")
-
             for line in text:
                 output.write(line + "\n")
             output.close()
@@ -347,16 +359,26 @@ class CybergloveCalibrer:
     def load_calib(self, filename):
         if filename == "":
             return -1
+
+        rospy.wait_for_service('/cyberglove/calibration')
         try:
-            # TODO(@dg-shadow): remove the literal namespace (rh_calibration) and replace with something dynamic
-            rospy.wait_for_service('/rh_cyberglove/reload_calibration', timeout=5)
+            calib = rospy.ServiceProxy('cyberglove/calibration', CalibrationSrv)
+            path = filename.encode("iso-8859-1")
+            resp = calib(path)
+            return resp.state
+        except rospy.ServiceException as e:
+            print('Failed to call start service')
+            return -2
+        '''try:
+            # TODO(@guihomework): remove the literal namespace and replace with something dynamic
+            rospy.wait_for_service('/left/cyberglove/reload_calibration', timeout=5)
             try:
                 calib = rospy.ServiceProxy(
-                    '/rh_cyberglove/reload_calibration', Empty)
+                    '/left/cyberglove/reload_calibration', Empty)
                 with open(filename, "r") as f:
                     calibration_dict = yaml.load(f.read())
                     calibration_string = calibration_dict["cyberglove_calibration"]
-                    rospy.set_param("/rh_cyberglove/cyberglove_calibration", calibration_string)
+                    rospy.set_param("/left/cyberglove/cyberglove_calibration", calibration_string)
                 calib()
             except rospy.ServiceException, e:
                 print 'Failed to call service: %s' % str(e)
@@ -364,6 +386,7 @@ class CybergloveCalibrer:
         except rospy.ROSException, e:
             print ('Service not found, is the driver running?')
             return -3
+        '''
         return 0
 
 
@@ -379,7 +402,7 @@ def main():
 
         cyber_calib.do_step_max(i)
     error = cyber_calib.write_calibration_file("../../param/cyberglove.cal")
-    print error
+    print(error)
 
     return 0
 

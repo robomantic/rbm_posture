@@ -24,7 +24,6 @@ import rospy
 import subprocess
 import threading
 import rosgraph.masterapi
-from sr_robot_msgs.msg import sendupdate, joint, joints_data
 from sensor_msgs.msg import *
 
 
@@ -42,8 +41,12 @@ class Cyberglove:
     """
     Interface to the Cyberglove publisher.
     """
-
-    def __init__(self, max_values=2, nb_sensors=22):
+    # TODO find the namespace in which rqt was started ?
+    def __init__(self, ns="/left", raw_topic="/raw/joint_states",
+            calibrated_topic="'/calibrated/joint_states'", max_values=2, nb_sensors=22):
+        self.ns = ns
+        self.raw_topic = raw_topic
+        self.calibrated_topic = calibrated_topic
         if nb_sensors == 22:
             self.joints = {"G_ThumbRotate": Joint(),
                            "G_ThumbMPJ": Joint(),
@@ -99,9 +102,9 @@ class Cyberglove:
         self.isFirstMessage = True
         self.liste = 0
         self.raw = rospy.Subscriber(
-            'rh_cyberglove/raw/joint_states', JointState, self.callback_raw)
+            self.ns + self.raw_topic, JointState, self.callback_raw)
         self.calibrated = rospy.Subscriber(
-            'cyberglove/calibrated/joint_states', JointState, self.callback_calibrated)
+            self.ns + self.calibrated_topic, JointState, self.callback_calibrated)
         threading.Thread(None, rospy.spin)
         if self.has_glove():
             time.sleep(1.0)
@@ -198,8 +201,9 @@ class Cyberglove:
             master = rosgraph.masterapi.Master('rostopic list')
             self.liste = master.getPublishedTopics('')
 
+        search_str = self.ns + self.raw_topic
         for topic_typ in self.liste:
             for topic in topic_typ:
-                if 'cyberglove/raw' in topic:
+                if search_str in topic:
                     self.hasglove = True
         return self.hasglove
