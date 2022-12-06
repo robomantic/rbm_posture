@@ -43,7 +43,7 @@ class Cyberglove:
     """
     # TODO find the namespace in which rqt was started ?
     def __init__(self, ns="/left", raw_topic="/raw/joint_states",
-            calibrated_topic="'/calibrated/joint_states'", max_values=2, nb_sensors=22):
+            calibrated_topic="/calibrated/joint_states", max_values=2, nb_sensors=22):
         self.ns = ns
         self.raw_topic = raw_topic
         self.calibrated_topic = calibrated_topic
