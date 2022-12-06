@@ -1,0 +1,435 @@
+#!/usr/bin/env python3
+#
+# Copyright 2011, 2022 Shadow Robot Company Ltd.
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+# pylint: disable-all
+
+"""
+Calibration utility for the cyberglove.
+
+@author: Ugo Cupcic
+@contact: ugo@shadowrobot.com, contact@shadowrobot.com
+"""
+
+from __future__ import absolute_import
+
+import os
+from builtins import input
+
+import roslib
+import rospy
+from cyberglove.srv import Calibration as CalibrationSrv
+from sr_gui_cyberglove_calibrator.cyberglove_library import Cyberglove
+# from std_srvs.srv import Empty
+
+# import yaml
+
+class Joint:
+
+    """
+    A class containing simple information regarding a joint: name, and calibrated value
+    """
+
+    def __init__(self, name, min=0, max=90):
+        """
+        @param name: the name of the joint
+        @param min: the min value to calibrate
+        @param max: the max value to calibrate
+        """
+        self.name = name
+        self.min = min
+        self.max = max
+
+
+class CalibrationStep:
+
+    """
+    A class containing all the data for a given calibration step
+    """
+
+    def __init__(self, step_name="", step_description=[""], joints=[]):
+        """
+        @param step_name: A short name for this calibration step
+        @param step_description: A table containing 2 descriptions: the first one describes the min pose, the second
+        the max
+        @param joints: A table containing the joints to be calibrated
+
+        """
+        self.step_name = step_name
+        self.step_description = step_description
+        self.joints = joints
+
+
+class Calibration:
+
+    """
+    A class Containing all the calibration data for a given joint.
+    """
+
+    def __init__(self, raw_min=0.0, raw_max=0.0,
+                 calibrated_min=0.0, calibrated_max=0.0,
+                 is_calibrated=0):
+        self.raw_min = raw_min
+        self.raw_max = raw_max
+        self.calibrated_min = calibrated_min
+        self.calibrated_max = calibrated_max
+        self.is_calibrated = is_calibrated
+
+
+def default_description(step_name, max=0):
+    """
+    The default description function for a step. Just prints a text for each step.
+
+    @param step_name: the name of the step
+    @param max: if 0=>we're reading the min values, if 1=> max values
+    """
+    if max == 0:
+        print(f"calibrating min values for: {step_name}")
+    else:
+        print(f"calibrating max values for: {step_name}")
+
+
+def do_nothing(step_name, max=0):
+    """
+    A function that does nothing. Used to have an empty description function.
+    """
+    nothing = True
+
+
+class CybergloveCalibrer:
+
+    """
+    A utility to calibrate the cyberglove.
+    """
+
+    def __init__(self, description_function=default_description, nb_sensors=22):
+        """
+        Initialize some class variables: a table containing the calibration steps, a connection to the cyberglove
+        library and a description function for the calibration steps
+
+        @param description_function: specify a function you want to use to describe the calibration steps ( text /
+        pictures / animation / ... ). Must take a joint name as parameter.
+        """
+        self.calibration_steps = []
+        if nb_sensors in [16, 18]:
+            self.nb_sensors = nb_sensors
+        else:
+            self.nb_sensors = 22
+        self.cyberglove = Cyberglove(nb_sensors=self.nb_sensors)
+
+        # fill the table containing all the joints
+        self.joints = {}
+        for name in self.cyberglove.get_joints_names():
+            self.joints[name] = Calibration()
+
+        self.get_calibration_steps()
+
+        if description_function is None:
+            description_function = do_nothing
+        self.description_function = description_function
+
+    def get_calibration_steps(self):
+        """
+        Read the calibration steps from the xml file.
+
+        @return: 0 when the values were read.
+        """
+
+        # first step: calibrate 0s, 3s and TH4
+        if self.nb_sensors in [16, 18]:
+            joints1 = [Joint("G_IndexMPJ", 0, 90), Joint("G_IndexPIJ", 0, 90),
+                       Joint("G_MiddleMPJ", 0, 90), Joint("G_MiddlePIJ", 0, 90),
+                       Joint("G_RingMPJ", 0, 90), Joint("G_RingPIJ", 0, 90),
+                       Joint("G_PinkieMPJ", 0, 90), Joint("G_PinkiePIJ", 0, 90),
+                       Joint("G_ThumbAb", 50, 0)]
+        else:
+            joints1 = [Joint("G_IndexMPJ", 0, 90), Joint("G_IndexPIJ", 0, 90),
+                       Joint("G_IndexDIJ", 0, 90), Joint("G_MiddleMPJ", 0, 90),
+                       Joint("G_MiddlePIJ", 0, 90), Joint("G_MiddleDIJ", 0, 90),
+                       Joint("G_RingMPJ", 0, 90), Joint("G_RingPIJ", 0, 90),
+                       Joint("G_RingDIJ", 0, 90), Joint("G_PinkieMPJ", 0, 90),
+                       Joint("G_PinkiePIJ", 0, 90), Joint("G_PinkieDIJ", 0, 90),
+                       Joint("G_ThumbAb", 90, 0)]
+        self.calibration_steps.append(
+            CalibrationStep(
+                step_name="Finger bending and Thumb abduction",  # xFJ3s, xFJ0s, THJ4
+                step_description=[
+                    "Hand flat on a table, fingers joined, thumb opened",
+                    "Hand forming a fist, thumb closed"],
+                joints=joints1))
+
+        # second step: calibrate finger abduction and thumb bending + wrist yaw
+        if self.nb_sensors == 16:
+            joints2 = [Joint("G_ThumbIJ", 90, 0), Joint("G_ThumbMPJ", 90, -10),
+                       Joint("G_MiddleIndexAb", 0, 45), Joint(
+                           "G_RingMiddleAb", 0, 50), Joint("G_PinkieRingAb", 0, 45)]
+            self.calibration_steps.append(
+                CalibrationStep(step_name="Finger abduction + Thumb bending",  # XFJ4s, THJ1/2
+                                step_description=["Hand flat fingers joined, thumb completely curled "
+                                              "under the palm",
+                                              "Hand flat fingers apart, thumb completely opened"],
+                            joints=joints2))
+
+        else:
+            joints2 = [Joint("G_ThumbIJ", 90, 0), Joint("G_ThumbMPJ", 30, -30),
+                       Joint("G_MiddleIndexAb", 0, 50), Joint(
+                           "G_RingMiddleAb", 0, 50), Joint("G_PinkieRingAb", 0, 50),
+                       Joint("G_WristYaw", 10, -30)]
+            self.calibration_steps.append(
+                CalibrationStep(step_name="Finger abduction + Thumb bending and wrist yaw",  # xFJ4s, THJ1/2, WRJ2
+                                step_description=["Hand flat fingers joined, thumb completely curled "
+                                              "under the palm, wrist bent to the left",
+                                              "Hand flat fingers apart, thumb completely opened,"
+                                              " wrist bent to the right"],
+                            joints=joints2))
+
+        # third step: calibrate TH5
+        if self.nb_sensors == 16:
+            joints3 = [Joint("G_ThumbRotate", 50, 0)]
+        else:
+            joints3 = [Joint("G_ThumbRotate", 60, -60)]
+        self.calibration_steps.append(CalibrationStep(step_name="Thumb rotation",  # THJ5
+                                                      step_description=["Thumb completely under the palm",
+                                                                        "Thumb completely opened, "
+                                                                        "curled over the palm"],
+                                                      joints=joints3))
+
+        # fourth step: calibrate palm arch (and wrist pitch)
+        if self.nb_sensors == 16:
+            joints4 = [Joint("G_PalmArch", 0, 40)]
+            self.calibration_steps.append(CalibrationStep(step_name="Palm arch",  # LFJ5
+                                                      step_description=["Hand flat",
+                                                                        "Palm curled"],
+                                                      joints=joints4))
+        else:
+            joints4 = [Joint("G_PalmArch", 0, 40), Joint("G_WristPitch", -30, 40)]
+            self.calibration_steps.append(CalibrationStep(step_name="Palm arch and Wrist pitch",  # LFJ5 + WRJ1
+                                                          step_description=["Hand flat, wrist 1 bent backward",
+                                                                            "Palm curled (LFJ5), wrist 1 bent forward"],
+                                                          joints=joints4))
+
+        return 0
+
+    def do_step_min(self, index):
+        """
+        Run  the given step of the calibration, gets the min values.
+
+        @param index: the index of the step in the calibration file
+        @return: 0 when the values were read.
+        """
+        joints = self.calibration_steps[index].joints
+        # display the description
+        self.description_function(self.calibration_steps[index].step_description[0], 0)
+
+        for joint in joints:
+            name = joint.name
+            # read the min values
+            self.joints[name].raw_min = self.cyberglove.read_raw_average_value(name)
+            self.joints[name].calibrated_min = joint.min
+            # still needs to read the max before fully calibrated
+            self.joints[name].is_calibrated += 0.5
+        return 0
+
+    def do_step_max(self, index):
+        """
+        Run  the given step of the calibration, gets the max values.
+        As this method is called after the do_step_min() method, we don't display the description
+
+        @param index: the index of the step in the calibration file
+        @return: 0 when the values were read.
+        """
+        joints = self.calibration_steps[index].joints
+        # display the description
+        self.description_function(self.calibration_steps[index].step_description[1], 0)
+
+        for joint in joints:
+            name = joint.name
+            # read the max values
+            self.joints[name].raw_max = self.cyberglove.read_raw_average_value(name)
+            self.joints[name].calibrated_max = joint.max
+            # still needs to read the max before fully calibrated
+            self.joints[name].is_calibrated += 0.5
+        return 0
+
+    def is_step_done(self, joint_name):
+        """
+        Check if the joint is calibrated.
+
+        @param joint_name: the name of the joint
+        @return: 1 if the joint has already been calibrated.
+        """
+
+        return self.joints[joint_name].is_calibrated
+
+    def all_steps_done(self):
+        """
+        Check if all the steps were processed.
+
+        @return: True if all the steps were processed.
+        """
+        for calib in self.joints.values():
+            if calib.is_calibrated != 1:
+                return False
+
+        return True
+
+    def reorder_calibration(self):
+        """
+        Reorder the calibration: set the raw_min to the min raw_value
+        """
+        for name in self.joints.keys():
+            if self.joints[name].raw_min > self.joints[name].raw_max:
+                tmp_raw = self.joints[name].raw_min
+                tmp_cal = self.joints[name].calibrated_min
+                self.joints[name].raw_min = self.joints[name].raw_max
+                self.joints[name].calibrated_min = self.joints[
+                    name].calibrated_max
+                self.joints[name].raw_max = tmp_raw
+                self.joints[name].calibrated_max = tmp_cal
+
+    def check_ranges(self):
+        """
+        Check for zero range calibrations, also for min/max values (-> full sensor range not being used)
+        """
+        self.reorder_calibration()
+        errors = []
+        for name in self.joints.keys():
+            if self.joints[name].raw_min == self.joints[name].raw_max:
+                errors.append("%s zero range: %f. Min modified (-0.001)."
+                              % (name, self.joints[name].raw_min))
+                self.joints[name].raw_min -= 0.001
+            if self.joints[name].raw_max == 1.0:
+                errors.append("%s max value is 1.0." % name)
+            if self.joints[name].raw_min == 0.0:
+                errors.append("%s min value is 0.0." % name)
+        for error in errors:
+            rospy.logwarn(error)
+
+        return errors
+
+    def write_calibration_file(self, filepath):
+        """
+        Checks if all the steps were processed by calling self.all_steps_done()
+        Reorder the calibration
+        Then writes the whole calibration to a given file.
+
+        @param filepath: Where to write the calibration
+        @return: 0 if the file has been written,
+                -1 if the calibration is not finished yet,
+                -2 if other error
+        """
+
+        # Where all the steps processed?
+        if not self.all_steps_done():
+            return -1
+
+        # reorder the calibration
+        self.reorder_calibration()
+
+        #
+        # Write to an xml file
+        #
+        # store the text in a table
+
+        text = []
+        # text.append("{'cyberglove_calibration': [")
+
+        text.append("<?xml version=\"1.0\" ?>")
+        text.append("<Cyberglove_calibration>")
+        for name in self.joints:
+            # joint name
+            text.append("<Joint name=\"" + name + "\">")
+            cal = self.joints[name]
+            # min value
+            text.append("<calib raw_value=\""+str(cal.raw_min) + "\" calibrated_value=\"" +
+                        str(cal.calibrated_min)+"\"/>")
+            # text.append("['%s', [[%f,%f],[%f,%f]]]," % (
+            #    name, cal.raw_min, cal.calibrated_min, cal.raw_max, cal.calibrated_max))
+
+            # max value
+            text.append("<calib raw_value=\""+str(cal.raw_max) + "\" calibrated_value=\"" +
+                        str(cal.calibrated_max)+"\"/>")
+
+            text.append("</Joint>")
+
+        text.append("</Cyberglove_calibration>")
+        # text.append("]}")
+
+        # write the text to a file
+        try:
+
+            output = open(filepath, "w")
+            for line in text:
+                output.write(line + "\n")
+            output.close()
+        except:
+            return -2
+
+        return 0
+
+    def load_calib(self, filename):
+        if filename == "":
+            return -1
+
+        rospy.wait_for_service('/cyberglove/calibration')
+        try:
+            calib = rospy.ServiceProxy('cyberglove/calibration', CalibrationSrv)
+            path = filename.encode("iso-8859-1")
+            resp = calib(path)
+            return resp.state
+        except rospy.ServiceException as e:
+            print('Failed to call start service')
+            return -2
+        '''try:
+            # TODO(@guihomework): remove the literal namespace and replace with something dynamic
+            rospy.wait_for_service('/left/cyberglove/reload_calibration', timeout=5)
+            try:
+                calib = rospy.ServiceProxy(
+                    '/left/cyberglove/reload_calibration', Empty)
+                with open(filename, "r") as f:
+                    calibration_dict = yaml.load(f.read())
+                    calibration_string = calibration_dict["cyberglove_calibration"]
+                    rospy.set_param("/left/cyberglove/cyberglove_calibration", calibration_string)
+                calib()
+            except rospy.ServiceException, e:
+                print 'Failed to call service: %s' % str(e)
+                return -2
+        except rospy.ROSException, e:
+            print ('Service not found, is the driver running?')
+            return -3
+        '''
+        return 0
+
+
+#
+# MAIN    #
+#
+def main():
+    cyber_calib = CybergloveCalibrer()
+    for i in range(0, len(cyber_calib.calibration_steps)):
+        raw_input(cyber_calib.calibration_steps[i].step_description[0])
+        cyber_calib.do_step_min(i)
+        raw_input(cyber_calib.calibration_steps[i].step_description[1])
+
+        cyber_calib.do_step_max(i)
+    error = cyber_calib.write_calibration_file("../../param/cyberglove.cal")
+    print(error)
+
+    return 0
+
+# start the script
+if __name__ == "__main__":
+    main()
