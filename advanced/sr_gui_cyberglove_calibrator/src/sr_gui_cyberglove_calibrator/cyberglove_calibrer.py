@@ -347,6 +347,8 @@ class CybergloveCalibrer:
         text.append("<?xml version=\"1.0\" ?>")
         text.append("<Cyberglove_calibration>")
         for name in self.joints:
+            # joint name
+            text.append("<Joint name=\"" + name + "\">")
             cal = self.joints[name]
             # min value
             text.append("<calib raw_value=\""+str(cal.raw_min) + "\" calibrated_value=\"" +
