@@ -19,7 +19,7 @@
 # TODO list
 # - handle joint names from a mapping (to match cyberglove names with joint_states names)
 # - handle namespace
-# - 
+# -
 
 
 import os
