@@ -124,7 +124,7 @@ class CybergloveCalibrer:
         pictures / animation / ... ). Must take a joint name as parameter.
         """
         self.calibration_steps = []
-        if nb_sensors == 18:
+        if nb_sensors in [16, 18]:
             self.nb_sensors = nb_sensors
         else:
             self.nb_sensors = 22
@@ -149,7 +149,7 @@ class CybergloveCalibrer:
         """
 
         # first step: calibrate 0s, 3s and TH4
-        if self.nb_sensors == 18:
+        if self.nb_sensors in [16, 18]:
             joints1 = [Joint("G_IndexMPJ", 0, 90), Joint("G_IndexPIJ", 0, 90),
                        Joint("G_MiddleMPJ", 0, 90), Joint("G_MiddlePIJ", 0, 90),
                        Joint("G_RingMPJ", 0, 90), Joint("G_RingPIJ", 0, 90),
@@ -165,39 +165,58 @@ class CybergloveCalibrer:
                        Joint("G_ThumbAb", 50, 0)]
         self.calibration_steps.append(
             CalibrationStep(
-                step_name="Joints 0s, 3s and thumb abduction (THJ4)",
+                step_name="Finger bending and Thumb abduction",  # xFJ3s, xFJ0s, THJ4
                 step_description=[
                     "Hand flat on a table, fingers joined, thumb opened",
                     "Hand forming a fist, thumb closed"],
                 joints=joints1))
 
-        # second step: calibrate 4s, TH1, TH2, TH5 and WR2
-        joints2 = [Joint("G_ThumbIJ", 90, 0), Joint("G_ThumbMPJ", 30, -30),
-                   Joint("G_MiddleIndexAb", 0, 50), Joint(
-                       "G_RingMiddleAb", 0, 50), Joint("G_PinkieRingAb", 0, 50),
-                   Joint("G_WristYaw", 10, -30)]
-        self.calibration_steps.append(
-            CalibrationStep(step_name="Joints 4s + TH1, 2, and WR2",
-                            step_description=["Hand flat fingers joined, thumb completely curled "
-                                              "under the palm, wrist 2 bent to the left",
-                                              "Hand flat fingers apart, thumb completely opened,"
-                                              " wrist bent 2 to the right"],
+        # second step: calibrate finger abduction and thumb bending + wrist yaw
+        if self.nb_sensors == 16:
+            joints2 = [Joint("G_ThumbIJ", 90, 0), Joint("G_ThumbMPJ", 30, -30),
+                       Joint("G_MiddleIndexAb", 0, 50), Joint(
+                           "G_RingMiddleAb", 0, 50), Joint("G_PinkieRingAb", 0, 50)]
+            self.calibration_steps.append(
+                CalibrationStep(step_name="Finger abduction + Thumb bending",  # XFJ4s, THJ1/2
+                                step_description=["Hand flat fingers joined, thumb completely curled "
+                                              "under the palm",
+                                              "Hand flat fingers apart, thumb completely opened"],
                             joints=joints2))
-
+           
+        else:
+            joints2 = [Joint("G_ThumbIJ", 90, 0), Joint("G_ThumbMPJ", 30, -30),
+                       Joint("G_MiddleIndexAb", 0, 50), Joint(
+                           "G_RingMiddleAb", 0, 50), Joint("G_PinkieRingAb", 0, 50),
+                       Joint("G_WristYaw", 10, -30)]
+            self.calibration_steps.append(
+                CalibrationStep(step_name="Finger abduction + Thumb bending and wrist yaw",  # xFJ4s, THJ1/2, WRJ2
+                                step_description=["Hand flat fingers joined, thumb completely curled "
+                                              "under the palm, wrist bent to the left",
+                                              "Hand flat fingers apart, thumb completely opened,"
+                                              " wrist bent to the right"],
+                            joints=joints2))
+        
         # third step: calibrate TH5
         joints3 = [Joint("G_ThumbRotate", 60, -60)]
-        self.calibration_steps.append(CalibrationStep(step_name="Joint TH5",
-                                                      step_description=["thumb completely under the palm",
-                                                                        "thumb completely opened, "
+        self.calibration_steps.append(CalibrationStep(step_name="Thumb rotation",  # THJ5
+                                                      step_description=["Thumb completely under the palm",
+                                                                        "Thumb completely opened, "
                                                                         "curled over the palm"],
                                                       joints=joints3))
 
-        # fourth step: calibrate LF5 and WR1
-        joints4 = [Joint("G_PalmArch", 0, 40), Joint("G_WristPitch", -30, 40)]
-        self.calibration_steps.append(CalibrationStep(step_name="LF5 and WR1",
-                                                      step_description=["Hand flat, wrist 1 bent backward",
-                                                                        "Palm curled (LFJ5), wrist 1 bent forward"],
+        # fourth step: calibrate palm arch (and wrist pitch)
+        if self.nb_sensors == 16:
+            joints4 = [Joint("G_PalmArch", 0, 40)]
+            self.calibration_steps.append(CalibrationStep(step_name="Palm arch",  # LFJ5
+                                                      step_description=["Hand flat",
+                                                                        "Palm curled"],
                                                       joints=joints4))
+        else:
+            joints4 = [Joint("G_PalmArch", 0, 40), Joint("G_WristPitch", -30, 40)]
+            self.calibration_steps.append(CalibrationStep(step_name="Palm arch and Wrist pitch",  # LFJ5 + WRJ1
+                                                          step_description=["Hand flat, wrist 1 bent backward",
+                                                                            "Palm curled (LFJ5), wrist 1 bent forward"],
+                                                          joints=joints4))
 
         return 0
 

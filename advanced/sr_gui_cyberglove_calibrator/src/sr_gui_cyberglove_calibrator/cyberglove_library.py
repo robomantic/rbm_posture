@@ -47,6 +47,7 @@ class Cyberglove:
         self.ns = ns
         self.raw_topic = raw_topic
         self.calibrated_topic = calibrated_topic
+        print("Creating CyberGlove instance with " + str(nb_sensors) + " sensors")
         if nb_sensors == 22:
             self.joints = {"G_ThumbRotate": Joint(),
                            "G_ThumbMPJ": Joint(),
@@ -93,6 +94,28 @@ class Cyberglove:
                            "G_PalmArch": Joint(),
                            "G_WristPitch": Joint(),
                            "G_WristYaw": Joint()}
+
+        if nb_sensors == 16:
+            self.joints = {"G_ThumbRotate": Joint(),
+                           "G_ThumbMPJ": Joint(),
+                           "G_ThumbIJ": Joint(),
+                           "G_ThumbAb": Joint(),
+                           "G_IndexMPJ": Joint(),
+                           "G_IndexPIJ": Joint(),
+
+                           "G_MiddleMPJ": Joint(),
+                           "G_MiddlePIJ": Joint(),
+
+                           "G_MiddleIndexAb": Joint(),
+                           "G_RingMPJ": Joint(),
+                           "G_RingPIJ": Joint(),
+
+                           "G_RingMiddleAb": Joint(),
+                           "G_PinkieMPJ": Joint(),
+                           "G_PinkiePIJ": Joint(),
+
+                           "G_PinkieRingAb": Joint(),
+                           "G_PalmArch": Joint()}
 
         self.raw_messages = []
         self.calibrated_messages = []
@@ -154,13 +177,19 @@ class Cyberglove:
         @param joint_name: the name of the glove of the Cyberglove
         """
         raw_value = 0
-        joint_index = self.map[joint_name]
-        for index in range(0, len(self.raw_messages)):
-            raw_value = raw_value + \
-                self.raw_messages[index].position[joint_index]
+        try:
+            joint_index = self.map[joint_name]
 
-        raw_value = raw_value / len(self.raw_messages)
+            for index in range(0, len(self.raw_messages)):
+                raw_value = raw_value + \
+                    self.raw_messages[index].position[joint_index]
 
+            raw_value = raw_value / len(self.raw_messages)
+
+        except KeyError:
+            print (joint_name + " not found in the incoming messages")
+            print ("map: ")
+            print (self.map.keys())
         return raw_value
 
     def read_calibrated_average_value(self, joint_name):
