@@ -298,8 +298,6 @@ class SrGuiCybergloveCalibrator(Plugin):
     def __init__(self, context):
         super(SrGuiCybergloveCalibrator, self).__init__(context)
         self.setObjectName('SrGuiCybergloveCalibrator')
-        self.icon_dir = os.path.join(
-            rospkg.RosPack().get_path('sr_visualization_icons'), '/icons')
 
         ui_file = os.path.join(rospkg.RosPack().get_path(
             'sr_gui_cyberglove_calibrator'), 'uis', 'SrGuiCybergloveCalibrator.ui')

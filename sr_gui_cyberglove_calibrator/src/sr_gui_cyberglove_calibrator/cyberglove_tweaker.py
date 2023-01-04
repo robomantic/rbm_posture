@@ -334,8 +334,6 @@ class SrGuiCybergloveTweaker(Plugin):
     def __init__(self, context):
         super(SrGuiCybergloveTweaker, self).__init__(context)
         self.setObjectName('SrGuiCybergloveTweaker')
-        self.icon_dir = os.path.join(
-            rospkg.RosPack().get_path('sr_visualization_icons'), '/icons')
 
         self._calibration_param = "/rh_cyberglove/cyberglove_calibration"
 
