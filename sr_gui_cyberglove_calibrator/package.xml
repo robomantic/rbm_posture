@@ -1,18 +1,14 @@
 <package>
   <name>sr_gui_cyberglove_calibrator</name>
   <version>1.3.0</version>
-  <description>A GUI plugin for bootloading the motors on the shadow etherCAT hand.</description>
-  <maintainer email="software@shadowrobot.com">Shadow Robot's software team</maintainer>
+  <description>A GUI plugin for calibrating cybergloves and similar devices.</description>
+  <maintainer email="gwalck@techfak.uni-bielefeld.de">Guillaume Walck</maintainer>
 
   <license>GPL</license>
 
-
-
-  <author email="software@shadowrobot.com">Ugo Cupcic </author>
-
+  <author email="software@shadowrobot.com">Ugo Cupcic</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
 
   <build_depend>rospy</build_depend>
   <build_depend>rqt_gui</build_depend>
