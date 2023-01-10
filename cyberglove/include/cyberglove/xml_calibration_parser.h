@@ -39,6 +39,7 @@
 
 // xml parser library
 #include <tinyxml.h>
+#include <XmlRpcValue.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -57,6 +58,7 @@ public:
   }
 
   float get_calibration_value(float position, std::string joint_name);
+  bool reload_calibration_from_param();
 
   struct Calibration
   {
@@ -86,6 +88,8 @@ protected:
   mapType joints_calibrations_map;
 
   int build_calibration_table();
+  bool from_rosparam(bool check_match_file = false);
+  void to_rosparam();
 
   float compute_lookup_value(int index, const std::vector<Calibration>& calib);
 
@@ -131,6 +135,12 @@ protected:
     return (static_cast<float>(lookup_index)) / lookup_precision;
   };
 };  // end class XmlCalibrationParser
+
+XmlRpc::XmlRpcValue to_xmlrpc(const xml_calibration_parser::XmlCalibrationParser::Calibration& cal);
+XmlRpc::XmlRpcValue
+to_xmlrpc(const std::vector<xml_calibration_parser::XmlCalibrationParser::Calibration>& calibrations);
+std::vector<xml_calibration_parser::XmlCalibrationParser::Calibration>
+from_xmlrpc(const XmlRpc::XmlRpcValue& calib_points);
 
 }  // namespace xml_calibration_parser
 #endif  // CYBERGLOVE_XML_CALIBRATION_PARSER_H_

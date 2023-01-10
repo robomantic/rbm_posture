@@ -41,9 +41,11 @@
 #include <boost/smart_ptr.hpp>
 #include <string>
 #include <vector>
+#include <mutex>
 
 // messages
 #include <sensor_msgs/JointState.h>
+#include <std_srvs/Trigger.h>
 #include "cyberglove/xml_calibration_parser.h"
 
 namespace cyberglove
@@ -68,6 +70,12 @@ private:
 
   // ros node handle
   ros::NodeHandle node, n_tilde;
+  // protect calibration when being reloaded
+  std::mutex calib_mutex;
+  // service
+  ros::ServiceServer reload_calibration_service;
+
+  bool reload_calibration(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
   /**
    * The callback function: called each time a full message

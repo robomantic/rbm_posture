@@ -64,6 +64,10 @@ CybergloveCalibPublisher::CybergloveCalibPublisher() : node(""), n_tilde("~")
   std::string full_topic = prefix + "/calibrated/joint_states";
   cyberglove_pub = node.advertise<sensor_msgs::JointState>(full_topic, 2);
 
+  // service to reload calibration from the param server (for live tweaking)
+  reload_calibration_service =
+      n_tilde.advertiseService("reload_calibration", &CybergloveCalibPublisher::reload_calibration, this);
+
   // subscribes raw JointState messages
   full_topic = prefix + "/raw/joint_states";
   cyberglove_raw_sub =
@@ -77,6 +81,14 @@ CybergloveCalibPublisher::~CybergloveCalibPublisher()
 void CybergloveCalibPublisher::initialize_calibration(std::string path_to_calibration)
 {
   calibration_parser = xml_calibration_parser::XmlCalibrationParser(path_to_calibration);
+}
+
+bool CybergloveCalibPublisher::reload_calibration(std_srvs::Trigger::Request& request,
+                                                  std_srvs::Trigger::Response& response)
+{
+  const std::lock_guard<std::mutex> lock(calib_mutex);
+  response.success = calibration_parser.reload_calibration_from_param();
+  return true;
 }
 
 /////////////////////////////////
@@ -96,13 +108,16 @@ void CybergloveCalibPublisher::callback(const sensor_msgs::JointStateConstPtr& m
 #endif
   cal_js.position.reserve(msg->name.size());
   // fill the joint_state msg with the calibrated data
-  for (unsigned int index_joint = 0; index_joint < msg->name.size(); ++index_joint)
   {
-    ROS_DEBUG_STREAM("calib " << msg->name[index_joint] << " " << msg->position[index_joint]);
-    float calibration_value =
-        calibration_parser.get_calibration_value(msg->position[index_joint], msg->name[index_joint]);
-    ROS_DEBUG_STREAM("calib value " << calibration_value);
-    cal_js.position.push_back(calibration_value);
+    const std::lock_guard<std::mutex> lock(calib_mutex);
+    for (unsigned int index_joint = 0; index_joint < msg->name.size(); ++index_joint)
+    {
+      ROS_DEBUG_STREAM("calib " << msg->name[index_joint] << " " << msg->position[index_joint]);
+      float calibration_value =
+          calibration_parser.get_calibration_value(msg->position[index_joint], msg->name[index_joint]);
+      ROS_DEBUG_STREAM("calib value " << calibration_value);
+      cal_js.position.push_back(calibration_value);
+    }
   }
 
   // publish the msgs

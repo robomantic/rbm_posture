@@ -70,6 +70,16 @@ XmlCalibrationParser::XmlCalibrationParser(std::string path_to_calibration)
   }
 }
 
+bool XmlCalibrationParser::reload_calibration_from_param()
+{
+  if (from_rosparam(true))
+  {
+    build_calibration_table();
+    return true;
+  }
+  return false;
+}
+
 /*
  * Parses the calibration file and retreive the full calibration for
  * the cyberglove.
@@ -209,6 +219,86 @@ int XmlCalibrationParser::build_calibration_table()
   return 0;
 }
 
+void XmlCalibrationParser::to_rosparam()
+{
+  // TinyXml cannot produce a string from the xml, so we create from the struct
+  // calibration_param.fromXml(doc.RootElement());
+  XmlRpc::XmlRpcValue calibration_param;
+  for (size_t index_calib = 0; index_calib < jointsCalibrations.size(); ++index_calib)
+  {
+    if (jointsCalibrations[index_calib].calibrations.size() >= 2)  // ignore invalid calibs
+    {
+      calibration_param[jointsCalibrations[index_calib].name] =
+          xml_calibration_parser::to_xmlrpc(jointsCalibrations[index_calib].calibrations);
+    }
+  }
+  ros::param::set("cyberglove/calibration", calibration_param);
+}
+
+/*
+ * read calibration values from ros param
+ *
+ * @param check_match_file if true, checks if existing calib (loaded from file
+ * matches in size with the one loaded from param, overwrite only if matches)
+ *
+ * @return true if successful
+ */
+bool XmlCalibrationParser::from_rosparam(bool check_match_file)
+{
+  if (ros::param::has("cyberglove/calibration"))
+  {
+    XmlRpc::XmlRpcValue calib_param;
+    ros::param::get("cyberglove/calibration", calib_param);
+
+    if (calib_param.getType() == XmlRpc::XmlRpcValue::TypeStruct)
+    {
+      std::vector<JointCalibration> tmp_jointsCalibrations;
+      for (auto it = calib_param.begin(); it != calib_param.end(); ++it)
+      {
+        // a Joint element was found
+        XmlCalibrationParser::JointCalibration joint_calib;
+        joint_calib.name = static_cast<std::string>(it->first);
+        // clear from past loops
+        joint_calib.calibrations.clear();
+        joint_calib.calibrations = from_xmlrpc(calib_param[joint_calib.name]);
+        // only consider calib with more than 1 calib point
+        if (joint_calib.calibrations.size() > 1)
+          tmp_jointsCalibrations.push_back(joint_calib);
+      }
+
+      if (check_match_file)
+      {
+        if (tmp_jointsCalibrations.size() == jointsCalibrations.size())
+        {
+          jointsCalibrations.clear();
+          jointsCalibrations = tmp_jointsCalibrations;
+          return true;
+        }
+        else
+        {
+          ROS_WARN_STREAM(
+              "calibration found on rosparam server but sizes do not match with calib file : "
+              " param joints="
+              << tmp_jointsCalibrations.size() << " file joints=" << jointsCalibrations.size());
+        }
+      }
+      else
+      {
+        jointsCalibrations.clear();
+        jointsCalibrations = tmp_jointsCalibrations;
+        return true;
+      }
+    }
+    else
+      ROS_WARN("param cyberglove/calibration not a struct");
+  }
+  else
+  {
+    ROS_WARN("param cyberglove/calibration not found");
+  }
+  return false;
+}
+
 /*
  * return the value to store in the lookup table for a given index,
  * using the calibration information.
@@ -284,4 +374,52 @@ int XmlCalibrationParser::return_index_from_raw_position(float raw_position)
     return (lookup_offset * lookup_precision) - 1;
   return round(raw_position * lookup_precision);
 };
+
+XmlRpc::XmlRpcValue to_xmlrpc(const xml_calibration_parser::XmlCalibrationParser::Calibration& cal)
+{
+  XmlRpc::XmlRpcValue xmlrpc_cal;
+  xmlrpc_cal.setSize(2);
+  xmlrpc_cal[0] = cal.raw_value;
+  xmlrpc_cal[1] = cal.calibrated_value;
+  return xmlrpc_cal;
+}
+
+XmlRpc::XmlRpcValue
+to_xmlrpc(const std::vector<xml_calibration_parser::XmlCalibrationParser::Calibration>& calibrations)
+{
+  XmlRpc::XmlRpcValue xmlrpc_cal_vec;
+  xmlrpc_cal_vec.setSize(calibrations.size());
+  for (unsigned int i = 0; i < calibrations.size(); ++i)
+  {
+    xmlrpc_cal_vec[i] = xml_calibration_parser::to_xmlrpc(calibrations[i]);
+  }
+  return xmlrpc_cal_vec;
+}
+
+std::vector<xml_calibration_parser::XmlCalibrationParser::Calibration>
+from_xmlrpc(const XmlRpc::XmlRpcValue& calib_points)
+{
+  std::vector<xml_calibration_parser::XmlCalibrationParser::Calibration> calibrations;
+  if (calib_points.getType() == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    // for each calib point
+    for (size_t i = 0; i < calib_points.size(); ++i)
+    {
+      xml_calibration_parser::XmlCalibrationParser::Calibration calibration;
+      const XmlRpc::XmlRpcValue& calib_values = calib_points[i];
+      if (calib_values.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      {
+        if (calib_values.size() == 2)
+        {
+          calibration.raw_value = (double)calib_values[0];
+          calibration.calibrated_value = (double)calib_values[1];
+          calibrations.push_back(calibration);
+        }
+      }
+    }
+  }
+  else
+    ROS_WARN("calibration point not an Array");
+  return calibrations;
+}
 }  // namespace xml_calibration_parser
