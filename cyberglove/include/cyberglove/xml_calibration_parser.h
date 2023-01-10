@@ -1,39 +1,38 @@
 /*
-* @file   xml_calibration_parser.h
-* @author Ugo Cupcic <ugo@shadowrobot.com>
-* @date   Tue Apr 27 11:30:41 2010
-*
-*
-* Copyright 2011 Shadow Robot Company Ltd.
-*
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the Free
-* Software Foundation version 2 of the License.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*
-* @brief  This is a simple xml parser, used to parse the calibration
-* file for the cyberglove.
-* A Calibration file must have this format:
-* <Cyberglove_calibration>
-*   <Joint name="G_ThumbRotate">
-*     <calib raw_value="0.0" calibrated_value="-60"/>
-*     <calib raw_value="0.42" calibrated_value="100"/>
-*   </Joint>
-* </Cyberglove_calibration>
-*
-* The calibration will be used by the glove node to stream coherent
-* angles (and not an uncalibrated sensor value between 0 and 1).
-*
-*
-*/
-
+ * @file   xml_calibration_parser.h
+ * @author Ugo Cupcic <ugo@shadowrobot.com>
+ * @date   Tue Apr 27 11:30:41 2010
+ *
+ *
+ * Copyright 2011 Shadow Robot Company Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @brief  This is a simple xml parser, used to parse the calibration
+ * file for the cyberglove.
+ * A Calibration file must have this format:
+ * <Cyberglove_calibration>
+ *   <Joint name="G_ThumbRotate">
+ *     <calib raw_value="0.0" calibrated_value="-60"/>
+ *     <calib raw_value="0.42" calibrated_value="100"/>
+ *   </Joint>
+ * </Cyberglove_calibration>
+ *
+ * The calibration will be used by the glove node to stream coherent
+ * angles (and not an uncalibrated sensor value between 0 and 1).
+ *
+ *
+ */
 
 #ifndef CYBERGLOVE_XML_CALIBRATION_PARSER_H_
 #define CYBERGLOVE_XML_CALIBRATION_PARSER_H_
@@ -46,13 +45,16 @@
 
 namespace xml_calibration_parser
 {
-
 class XmlCalibrationParser
 {
- public:
-  XmlCalibrationParser() {}
+public:
+  XmlCalibrationParser()
+  {
+  }
   explicit XmlCalibrationParser(std::string path_to_calibration);
-  ~XmlCalibrationParser() {}
+  ~XmlCalibrationParser()
+  {
+  }
 
   float get_calibration_value(float position, std::string joint_name);
 
@@ -73,7 +75,7 @@ class XmlCalibrationParser
     return jointsCalibrations;
   }
 
- protected:
+protected:
   void parse_calibration_file(TiXmlNode* pParent);
   std::vector<Calibration> parse_joint_attributes(TiXmlNode* pParent);
 
@@ -102,8 +104,8 @@ class XmlCalibrationParser
    */
   inline int round(float number)
   {
-      // we only have positive numbers
-      return static_cast<int>(floor(number + 0.5));
+    // we only have positive numbers
+    return static_cast<int>(floor(number + 0.5));
   }
 
   /*
