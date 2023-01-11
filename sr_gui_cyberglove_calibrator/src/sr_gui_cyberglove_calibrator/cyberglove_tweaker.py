@@ -18,7 +18,7 @@
 
 import rospy
 import rospkg
-
+import rosservice
 
 from qt_gui.plugin import Plugin
 import QtCore
@@ -30,8 +30,8 @@ from QtWidgets import *
 from math import degrees
 from copy import deepcopy
 
-from cyberglove_calibrer import *
-from cyberglove_mapper import *
+from sr_gui_cyberglove_calibrator.cyberglove_calibrer import *
+from sr_gui_cyberglove_calibrator.cyberglove_mapper import *
 
 from sensor_msgs.msg import JointState
 from std_srvs.srv import Empty
@@ -243,11 +243,11 @@ class SrGuiCybergloveTweaker(Plugin):
     The plugin used to tweak glove calibrations.
     """
     name = "Cyberglove Calibration Tweaker"
-
+    
     def _make_listeners(self):
-        self._raw_listner = rospy.Subscriber("/rh_cyberglove/raw/joint_states",
+        self._raw_listner = rospy.Subscriber(self.ns + "raw/joint_states",
                                              JointState, self._raw_callback, queue_size=1)
-        self._calibrated_listner = rospy.Subscriber("/rh_cyberglove/calibrated/joint_states",
+        self._calibrated_listner = rospy.Subscriber(self.ns + "calibrated/joint_states",
                                                     JointState, self._calibrated_callback, queue_size=1)
 
     def _get_calibration_from_parameter(self, calibration=None):
@@ -255,9 +255,10 @@ class SrGuiCybergloveTweaker(Plugin):
             calibration = rospy.get_param(self._calibration_param)
         self._original_calibration = deepcopy(calibration)
         self._calibration = {}
-        for entry in calibration:
-            name = entry[0]
-            self._calibration[name] = entry[1]
+        # TODO is this not useless as the params are already a dictionary ?
+        for key in calibration:
+            name = key
+            self._calibration[name] = calibration[key]
 
     def _raw_callback(self, msg):
         for n, joint in enumerate(msg.name):
@@ -277,7 +278,9 @@ class SrGuiCybergloveTweaker(Plugin):
 
     def _output_calibration_to_parameter(self, calibration=None):
         if calibration is None:
-            calibration = [[name, self._calibration[name]] for name in self._joint_names]
+            # calibration = dict((name, self._calibration[name]) for name in self._joint_names)
+            calibration = self._calibration
+            # calibration = [[name, self._calibration[name]] for name in self._joint_names]
         rospy.set_param(self._calibration_param, calibration)
         self._driver_reload_callback()
 
@@ -323,20 +326,44 @@ class SrGuiCybergloveTweaker(Plugin):
 
     def _make_calibrer(self):
         # read nb_sensors from rosparam or fallback to 22
-        if rospy.has_param('rh_cyberglove/cyberglove_joint_number'):
-            self.nb_sensors = rospy.get_param('rh_cyberglove/cyberglove_joint_number')
+        if rospy.has_param('cyberglove/cyberglove_joint_number'):
+            self.nb_sensors = rospy.get_param('cyberglove/cyberglove_joint_number')
         else:
             self.nb_sensors = 22
         self._calibrer = CybergloveCalibrer(description_function=None, nb_sensors=self.nb_sensors)
-        self._joint_names = self._calibrer.cyberglove.joints.keys()
+        self._joint_names = list(self._calibrer.cyberglove.joints.keys())
         self._joint_names.sort()
+
+    def _get_calibration_node(self):
+        service_list = rosservice.get_service_list(namespace=self.ns)
+        node_name = None
+        for service in service_list: 
+            if "/reload_calibration" in service: 
+                node_end = service.find("/reload_calibration") 
+                node_start = service.rfind(self.ns) + len(self.ns) 
+                node_name = service[node_start:node_end]
+        return node_name
 
     def __init__(self, context):
         super(SrGuiCybergloveTweaker, self).__init__(context)
         self.setObjectName('SrGuiCybergloveTweaker')
-
-        self._calibration_param = "/rh_cyberglove/cyberglove_calibration"
-
+        
+        # find the namespace in which the calibrator was started
+        self.ns = rospy.get_namespace()
+        # find the node advertizing the reload calibration service
+        self.calib_node_name = self._get_calibration_node()
+        if self.calib_node_name is None:
+            self.calib_node_name = "cyberglove"
+    
+        '''if rospy.has_param(self.ns + "/" + self.calib_node_name + '/path_to_calibration'):
+            self._calibration_param = self.ns + "/" + self.calib_node_name + '/path_to_calibration'
+        else:
+            self._calibration_param = "/cyberglove/path_to_calibration"
+        '''
+        if rospy.has_param(self.ns + "cyberglove/calibration"):
+            self._calibration_param = self.ns + "cyberglove/calibration"
+        else:
+            self._calibration_param = "/cyberglove/calibration"
         self._make_calibrer()
 
         self._make_widget(context)

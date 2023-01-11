@@ -309,10 +309,10 @@ class SrGuiCybergloveCalibrator(Plugin):
         # self.layout = QtWidgets.QVBoxLayout()
         # self.frame.setLayout(self.layout)
         # self.window.setWidget(self.frame)
-
+  
         # read nb_sensors from rosparam or fallback to 22
-        if rospy.has_param('/left/cyberglove/cyberglove_joint_number'):
-            self.nb_sensors = rospy.get_param('/left/cyberglove/cyberglove_joint_number')
+        if rospy.has_param('cyberglove/cyberglove_joint_number'):
+            self.nb_sensors = rospy.get_param('cyberglove/cyberglove_joint_number')
         else:
             self.nb_sensors = 22
 
