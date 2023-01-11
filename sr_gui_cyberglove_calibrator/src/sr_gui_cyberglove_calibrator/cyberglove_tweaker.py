@@ -66,21 +66,22 @@ class SrGuiCyberglovePointTweaker(QtWidgets.QWidget):
         button.setMaximumSize(40, 40)
         return button
 
-    def __init__(self, index, raw, calibrated, button_callback=lambda x, y: x):
+    def __init__(self, index, raw, calibrated, scale, button_callback=lambda x, y: x):
         super(SrGuiCyberglovePointTweaker, self).__init__()
+        self.scale = scale
         self.setLayout(QGridLayout())
         self.layout().setVerticalSpacing(25)
 
         self._raw_value_label = QLabel()
         self._calibrated_value_label = QLabel()
 
-        up1 = self._get_button("+++", 0.1)
-        up2 = self._get_button("++", 0.01)
-        up3 = self._get_button("+", 0.001)
+        up1 = self._get_button("+++", 0.1 * self.scale)
+        up2 = self._get_button("++", 0.01 * self.scale)
+        up3 = self._get_button("+", 0.001 * self.scale)
 
-        down1 = self._get_button("- - -", -0.1)
-        down2 = self._get_button("- -", -0.01)
-        down3 = self._get_button("-", -0.001)
+        down1 = self._get_button("- - -", -0.1 * self.scale)
+        down2 = self._get_button("- -", -0.01 * self.scale)
+        down3 = self._get_button("-", -0.001 * self.scale)
 
         self.layout().addWidget(self._calibrated_value_label, 0, 0)
         self.layout().addWidget(self._raw_value_label, 1, 0)
@@ -118,9 +119,9 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
     # You can't set widget properties from outside main thread, so create a signal to updat with new sensor readings
     update_gui = pyqtSignal()
 
-    def __init__(self, joint_name, calibration_changed_callback, calibration_points, tweak_callback):
+    def __init__(self, joint_name, calibration_changed_callback, calibration_points, scale, tweak_callback):
         super(SrGuiCybergloveJointTweaker, self).__init__()
-
+        self._scale = scale
         self._tweak_callback = tweak_callback
         self._joint_name = joint_name
 
@@ -130,7 +131,7 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(self._get_labels(joint_name))
 
-        self.layout().addWidget(self._get_points_and_display(self._calibration_points))
+        self.layout().addWidget(self._get_points_and_display(self._calibration_points, self._scale))
 
         self.layout().addWidget(self._get_picture(joint_name))
         self.layout().addStretch()
@@ -158,7 +159,7 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
         labels.layout().addWidget(self._raw_value_label)
         return labels
 
-    def _get_points_and_display(self, calibration_points):
+    def _get_points_and_display(self, calibration_points, scale=1.0):
 
         points = QtWidgets.QWidget()
         points.setLayout(QHBoxLayout())
@@ -166,9 +167,9 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
         points_and_display = QtWidgets.QWidget()
         points_and_display.setLayout(QVBoxLayout())
         points_and_display.layout().setSpacing(30)
-
+        print ("I know the scale", scale)
         for n, point in enumerate(calibration_points):
-            points.layout().addWidget(SrGuiCyberglovePointTweaker(n, point[0], point[1], self._point_change_callback))
+            points.layout().addWidget(SrGuiCyberglovePointTweaker(n, point[0], point[1], scale, self._point_change_callback))
             if n < len(calibration_points) - 1:
                 points.layout().addWidget(QVLine())
 
@@ -256,9 +257,21 @@ class SrGuiCybergloveTweaker(Plugin):
         self._original_calibration = deepcopy(calibration)
         self._calibration = {}
         # TODO is this not useless as the params are already a dictionary ?
+        # take the opportunity to find the scale
+        min_raw = 0
+        max_raw = 0
         for key in calibration:
             name = key
             self._calibration[name] = calibration[key]
+            for calib_point in calibration[key]:
+                for raw_val in calib_point:
+                    if raw_val < min_raw:
+                        min_raw = raw_val
+                    if raw_val > max_raw:
+                        max_raw = raw_val
+        print (min_raw, max_raw)
+        self._scale = max_raw - min_raw;
+        print (self._scale)
 
     def _raw_callback(self, msg):
         for n, joint in enumerate(msg.name):
@@ -316,7 +329,7 @@ class SrGuiCybergloveTweaker(Plugin):
         self._joint_lines = {}
 
         for joint in self._joint_names:
-            joint_tweaker = SrGuiCybergloveJointTweaker(joint, None, self._calibration[joint], self._tweak_callback)
+            joint_tweaker = SrGuiCybergloveJointTweaker(joint, None, self._calibration[joint], self._scale, self._tweak_callback)
             joint_tweaker.set_raw_value(0)
             joint_tweaker.set_calibrated_value(0)
             self._joint_tweakers[joint] = joint_tweaker
