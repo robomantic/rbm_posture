@@ -62,6 +62,7 @@ XmlCalibrationParser::XmlCalibrationParser(std::string path_to_calibration)
   {
     ROS_DEBUG("loading calibration %s", path_to_calibration.c_str());
     parse_calibration_file(doc.RootElement());
+    to_rosparam();
     build_calibration_table();
   }
   else
@@ -72,7 +73,7 @@ XmlCalibrationParser::XmlCalibrationParser(std::string path_to_calibration)
 
 bool XmlCalibrationParser::reload_calibration_from_param()
 {
-  if (from_rosparam(true))
+  if (from_rosparam(false))
   {
     build_calibration_table();
     return true;
