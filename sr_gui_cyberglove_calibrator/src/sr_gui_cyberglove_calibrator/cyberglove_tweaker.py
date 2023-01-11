@@ -34,7 +34,7 @@ from sr_gui_cyberglove_calibrator.cyberglove_calibrer import *
 from sr_gui_cyberglove_calibrator.cyberglove_mapper import *
 
 from sensor_msgs.msg import JointState
-from std_srvs.srv import Empty
+from std_srvs.srv import Trigger
 
 import sip
 
@@ -372,7 +372,7 @@ class SrGuiCybergloveTweaker(Plugin):
 
         self._widget.setWindowTitle('Cyberglove Calibration Tweaker')
 
-        self._driver_reload_callback = rospy.ServiceProxy("/rh_cyberglove/reload_calibration", Empty)
+        self._driver_reload_callback = rospy.ServiceProxy(self.ns + self.calib_node_name +"/reload_calibration", Trigger)
 
     def _make_buttons(self):
         btn_frame = QtWidgets.QFrame()
