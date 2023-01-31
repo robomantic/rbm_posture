@@ -167,7 +167,6 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
         points_and_display = QtWidgets.QWidget()
         points_and_display.setLayout(QVBoxLayout())
         points_and_display.layout().setSpacing(30)
-        print ("I know the scale", scale)
         for n, point in enumerate(calibration_points):
             points.layout().addWidget(SrGuiCyberglovePointTweaker(n, point[0], point[1], scale, self._point_change_callback))
             if n < len(calibration_points) - 1:
@@ -244,7 +243,7 @@ class SrGuiCybergloveTweaker(Plugin):
     The plugin used to tweak glove calibrations.
     """
     name = "Cyberglove Calibration Tweaker"
-    
+
     def _make_listeners(self):
         self._raw_listner = rospy.Subscriber(self.ns + "raw/joint_states",
                                              JointState, self._raw_callback, queue_size=1)
@@ -351,24 +350,24 @@ class SrGuiCybergloveTweaker(Plugin):
     def _get_calibration_node(self):
         service_list = rosservice.get_service_list(namespace=self.ns)
         node_name = None
-        for service in service_list: 
-            if "/reload_calibration" in service: 
-                node_end = service.find("/reload_calibration") 
-                node_start = service.rfind(self.ns) + len(self.ns) 
+        for service in service_list:
+            if "/reload_calibration" in service:
+                node_end = service.find("/reload_calibration")
+                node_start = service.rfind(self.ns) + len(self.ns)
                 node_name = service[node_start:node_end]
         return node_name
 
     def __init__(self, context):
         super(SrGuiCybergloveTweaker, self).__init__(context)
         self.setObjectName('SrGuiCybergloveTweaker')
-        
+
         # find the namespace in which the calibrator was started
         self.ns = rospy.get_namespace()
         # find the node advertizing the reload calibration service
         self.calib_node_name = self._get_calibration_node()
         if self.calib_node_name is None:
             self.calib_node_name = "cyberglove"
-    
+
         '''if rospy.has_param(self.ns + "/" + self.calib_node_name + '/path_to_calibration'):
             self._calibration_param = self.ns + "/" + self.calib_node_name + '/path_to_calibration'
         else:
