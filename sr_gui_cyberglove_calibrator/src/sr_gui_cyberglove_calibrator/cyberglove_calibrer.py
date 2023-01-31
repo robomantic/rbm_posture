@@ -384,7 +384,7 @@ class CybergloveCalibrer:
         if filename == "":
             return -1
 
-        rospy.wait_for_service('/cyberglove/calibration')
+        rospy.wait_for_service('cyberglove/calibration')
         try:
             calib = rospy.ServiceProxy('cyberglove/calibration', CalibrationSrv)
             path = filename.encode("iso-8859-1")
