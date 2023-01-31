@@ -69,6 +69,8 @@ class HumanhandToCybergloveRemapper
   bool legacy_abduction;
   /// limit or not the abduction
   double abduction_max;
+  /// bool storing if finger abduction jointnames were found
+  bool finger_abduction_jointnames_found;
   /// Vector containing all the joints names for the shadowhand.
   std::vector<std::string> joints_names;
   /// subscriber to the jointstates topic from the cyberglove
@@ -77,6 +79,8 @@ class HumanhandToCybergloveRemapper
   Publisher js_pub;
   ///the calibration parser containing the mapping matrix
   CalibrationParser* calibration_parser;
+  /// map storing indices of abduction
+  std::map<std::string, unsigned int> abduction_indices;
 
   /////////////////
   //  CALLBACKS  //

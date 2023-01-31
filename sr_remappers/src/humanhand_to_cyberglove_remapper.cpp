@@ -46,6 +46,7 @@ const unsigned int HumanhandToCybergloveRemapper::number_hand_joints = 20;
 HumanhandToCybergloveRemapper::HumanhandToCybergloveRemapper() :
     n_tilde("~")
 {
+    finger_abduction_jointnames_found = false;
     joints_names.resize(number_hand_joints);
     HumanhandToCybergloveRemapper::init_names();
 
@@ -112,6 +113,24 @@ void HumanhandToCybergloveRemapper::jointstatesCallback( const sensor_msgs::Join
 {
     //Do conversion
     std::vector<double> vect = calibration_parser->get_remapped_vector(msg->position);
+    
+    // find at which index finger abduction angles are (once)
+    if (!finger_abduction_jointnames_found)
+    {
+      for(unsigned int i = 0; i < msg->name.size(); ++i )
+      {
+        if (msg->name[i] == "G_MiddleIndexAb")
+          abduction_indices["G_MiddleIndexAb"] = i;
+        if (msg->name[i] == "G_RingMiddleAb")
+          abduction_indices["G_RingMiddleAb"] = i;
+        if (msg->name[i] == "G_PinkieRingAb")
+          abduction_indices["G_PinkieRingAb"] = i;
+      }
+      if (abduction_indices.size() == 3)
+      {
+        finger_abduction_jointnames_found = true;
+      }
+    }
 
     //Process J4's
     getAbductionJoints(msg, vect);
@@ -128,9 +147,15 @@ void HumanhandToCybergloveRemapper::jointstatesCallback( const sensor_msgs::Join
 
 void HumanhandToCybergloveRemapper::getAbductionJoints( const sensor_msgs::JointStateConstPtr& msg, std::vector<double>& vect)
 {
-  double middleIndexAb = msg->position[13];
-  double ringMiddleAb = msg->position[10];
-  double pinkieRingAb = msg->position[14];
+  if (!finger_abduction_jointnames_found)
+  {
+    ROS_WARN_ONCE("No abduction joint data found, abduction remapping will not be computed");
+    return;
+  }
+  
+  double middleIndexAb = msg->position[abduction_indices["G_MiddleIndexAb"]];
+  double ringMiddleAb = msg->position[abduction_indices["G_RingMiddleAb"]];
+  double pinkieRingAb = msg->position[abduction_indices["G_PinkieRingAb"]];
 
   // if the abduction sensors are less than 0, it is an artifact of the calibration (we don't want to consider anything smaller than 0 for these sensors)
   if (middleIndexAb < 0.0)
