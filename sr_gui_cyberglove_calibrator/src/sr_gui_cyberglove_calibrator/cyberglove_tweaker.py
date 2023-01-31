@@ -435,26 +435,37 @@ class SrGuiCybergloveTweaker(Plugin):
         self._add_tweakers_to_widget()
 
     def _save_calibration(self):
+        #
+        # Write to an xml file
+        #
+        # store the text in a table
         (file_name, dummy) = QtWidgets.QFileDialog.getSaveFileName(
             self._widget, 'Save Calibration', '')
         if file_name == "":
             return
 
-        text = ["{'cyberglove_calibration': ["]
-
+        text = []
+        text.append("<?xml version=\"1.0\" ?>")
+        text.append("<Cyberglove_calibration>")
         for name in self._joint_names:
-            calibration_string = str(self._calibration[name])
-            text.append("['%s', %s]," % (name, calibration_string))
-        text.append("]}")
+            # joint name
+            text.append("<Joint name=\"" + name + "\">")
+            calibration_points = self._calibration[name]
+            for calib_point in calibration_points:
+                text.append("<calib raw_value=\""+"{:.3f}".format(calib_point[0]) + "\" calibrated_value=\"" + "{:.3f}".format(calib_point[1])+"\"/>")
+            text.append("</Joint>")
+        text.append("</Cyberglove_calibration>")
 
+        # write the text to a file
         try:
-            with open(file_name, "w") as output_file:
-                for line in text:
-                    output_file.write(line + "\n")
+            output = open(file_name, "w")
+            for line in text:
+                output.write(line + "\n")
+            output.close()
         except Exception as e:
             rospy.logerr(str(e))
             QtWidgets.QMessageBox.information(
-                self._widget, "Calibration saving failed!", "Saving loading failed: %s" % str(e),
+                self._widget, "Calibration saving failed!", "Saving failed: %s" % str(e),
                 QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
 
     def _load_calibration(self):
