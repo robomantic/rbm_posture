@@ -260,15 +260,16 @@ class SrGuiCybergloveTweaker(Plugin):
         # take the opportunity to find the scale
         min_raw = 0
         max_raw = 0
+        # for each joint name
         for key in calibration:
             name = key
             self._calibration[name] = calibration[key]
             for calib_point in calibration[key]:
-                for raw_val in calib_point:
-                    if raw_val < min_raw:
-                        min_raw = raw_val
-                    if raw_val > max_raw:
-                        max_raw = raw_val
+                raw_val = calib_point[0]
+                if raw_val < min_raw:
+                    min_raw = raw_val
+                if raw_val > max_raw:
+                    max_raw = raw_val
         print (min_raw, max_raw)
         self._scale = max_raw - min_raw;
         print (self._scale)
