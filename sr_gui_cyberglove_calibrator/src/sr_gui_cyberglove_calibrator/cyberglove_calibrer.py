@@ -354,14 +354,14 @@ class CybergloveCalibrer:
             text.append("<Joint name=\"" + name + "\">")
             cal = self.joints[name]
             # min value
-            text.append("<calib raw_value=\""+str(cal.raw_min) + "\" calibrated_value=\"" +
-                        str(cal.calibrated_min)+"\"/>")
+            text.append("<calib raw_value=\""+ "{:.3f}".format(cal.raw_min) + "\" calibrated_value=\"" +
+                        "{:.3f}".format(cal.calibrated_min)+"\"/>")
             # text.append("['%s', [[%f,%f],[%f,%f]]]," % (
             #    name, cal.raw_min, cal.calibrated_min, cal.raw_max, cal.calibrated_max))
 
             # max value
-            text.append("<calib raw_value=\""+str(cal.raw_max) + "\" calibrated_value=\"" +
-                        str(cal.calibrated_max)+"\"/>")
+            text.append("<calib raw_value=\""+"{:.3f}".format(cal.raw_max) + "\" calibrated_value=\"" +
+                        "{:.3f}".format(cal.calibrated_max)+"\"/>")
 
             text.append("</Joint>")
 
