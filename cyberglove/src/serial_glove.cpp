@@ -330,7 +330,6 @@ void CybergloveSerial::stream_callback(char* world, int length)
             // the values sent by the glove are in the range [1;254]
             //   -> we convert them to float in the range [0;1]
             glove_positions[glove_pos_index] = ((static_cast<float>(current_value)) - 1.0f) / 254.0f;
-            break;
           }
           else
           {
