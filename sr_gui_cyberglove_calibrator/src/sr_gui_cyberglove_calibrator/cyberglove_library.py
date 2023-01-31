@@ -44,7 +44,14 @@ class Cyberglove:
     # TODO find the namespace in which rqt was started ?
     def __init__(self, raw_topic="raw/joint_states",
             calibrated_topic="calibrated/joint_states", max_values=2, nb_sensors=22):
-        self.ns = "/" + rospy.get_namespace()
+        ns = rospy.get_namespace()
+        self.ns = ns
+        if len(ns):
+            if ns[0] != '/':
+              self.ns = "/" + ns
+        else:
+            self.ns = "/"
+
         print ("Namespace for cyberglove:", self.ns)
 
         self.raw_topic = raw_topic
