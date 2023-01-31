@@ -343,6 +343,12 @@ class SrGuiCybergloveTweaker(Plugin):
             self.nb_sensors = rospy.get_param('cyberglove/cyberglove_joint_number')
         else:
             self.nb_sensors = 22
+        # read calibration path
+        if rospy.has_param('cyberglove/path_to_calibration'):
+            self.calib_file = rospy.get_param('cyberglove/path_to_calibration')
+        else:
+            self.calib_file = ""
+
         self._calibrer = CybergloveCalibrer(description_function=None, nb_sensors=self.nb_sensors)
         self._joint_names = list(self._calibrer.cyberglove.joints.keys())
         self._joint_names.sort()
@@ -439,7 +445,7 @@ class SrGuiCybergloveTweaker(Plugin):
         #
         # store the text in a table
         (file_name, dummy) = QtWidgets.QFileDialog.getSaveFileName(
-            self._widget, 'Save Calibration', '')
+            self._widget, 'Save Calibration', self.calib_file)
         if file_name == "":
             return
 

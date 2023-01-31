@@ -315,6 +315,11 @@ class SrGuiCybergloveCalibrator(Plugin):
             self.nb_sensors = rospy.get_param('cyberglove/cyberglove_joint_number')
         else:
             self.nb_sensors = 22
+        # read calibration path
+        if rospy.has_param('cyberglove/path_to_calibration'):
+            self.calib_file = rospy.get_param('cyberglove/path_to_calibration')
+        else:
+            self.calib_file = ""
 
         self.calibrer = CybergloveCalibrer(description_function=None, nb_sensors=self.nb_sensors)
         self.joint_names = list(self.calibrer.cyberglove.joints.keys())
@@ -383,7 +388,7 @@ class SrGuiCybergloveCalibrator(Plugin):
     def save_calib(self):
         # since pyqt5, filters are also returned
         (filename, dummy) = QtWidgets.QFileDialog.getSaveFileName(
-            self._widget, 'Save Calibration', '')
+            self._widget, 'Save Calibration', self.calib_file)
         if filename == "":
             return
 
