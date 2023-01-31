@@ -284,7 +284,7 @@ class SrGuiCybergloveTweaker(Plugin):
         for n, joint in enumerate(msg.name):
             if joint in self._joint_tweakers:
                 value = msg.position[n]
-                self._joint_tweakers[joint].set_calibrated_value(degrees(value))
+                self._joint_tweakers[joint].set_calibrated_value(value)
 
     def _tweak_callback(self, joint, calibration):
         self._calibration[joint] = calibration
