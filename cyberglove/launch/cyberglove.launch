@@ -13,10 +13,11 @@
 
 <launch>
   <arg name="serial_port" default="/dev/ttyUSB0"/>
-  <arg name="calibration" default="$(find sr_cyberglove_config)/calibrations/cyberglove.cal"/>
+  <arg name="calibration" default="$(find cyberglove)/config/cyberglove.cal"/>
   <arg name="version" default="2"/>
   <arg name="joint_number" default="22"/>
   <arg name="protocol" default="8bit"/>
+  <arg name="cyberglove_prefix" default="cyberglove"/>
   <!-- Activate internal cybeglove data filtering -->
   <arg name="filter" default="true"/>
 
@@ -24,7 +25,7 @@
   cyberglove)/model/cyberglove.xml"/>
 
   <node pkg="cyberglove" name="cyberglove" type="cyberglove_node" output="screen" >
-    <param name="cyberglove_prefix" type="string" value="/cyberglove" />
+    <param name="cyberglove_prefix" type="string" value="$(arg cyberglove_prefix)" />
     <!-- We're doing some oversampling. You can set the frequency at which
 	 the data are sampled as well as the frequency at which they're published
 	 possible values:
