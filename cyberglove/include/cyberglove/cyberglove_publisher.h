@@ -34,11 +34,13 @@
 #include <string>
 #include <vector>
 #include <boost/smart_ptr.hpp>
+#include <mutex>
 
 #include "cyberglove/serial_glove.h"
 
 // messages
 #include <sensor_msgs/JointState.h>
+#include <std_srvs/Trigger.h>
 #include "cyberglove/xml_calibration_parser.h"
 
 namespace cyberglove
@@ -65,6 +67,8 @@ private:
   // ros node handle
   ros::NodeHandle node, n_tilde;
   unsigned int publish_counter_max, publish_counter_index;
+  // protect calibration when being reloaded
+  std::mutex calib_mutex;
 
   // the actual connection with the cyberglove is done here.
   boost::shared_ptr<CybergloveSerial> serial_glove;
@@ -79,12 +83,16 @@ private:
    */
   void glove_callback(std::vector<float> glove_pos, bool light_on);
 
+  bool reload_calibration(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+
   std::string path_to_glove;
   bool publishing;
 
   // the calibration parser
   xml_calibration_parser::XmlCalibrationParser calibration_parser;
 
+  // service
+  ros::ServiceServer reload_calibration_service;
   ros::Publisher cyberglove_raw_pub;
 
   sensor_msgs::JointState jointstate_msg;

@@ -129,6 +129,10 @@ CyberglovePublisher::CyberglovePublisher()
   full_topic = prefix + "/raw/joint_states";
   cyberglove_raw_pub = n_tilde.advertise<sensor_msgs::JointState>(full_topic, 2);
 
+  // service to reload calibration from the param server (for live tweaking)
+  reload_calibration_service =
+      n_tilde.advertiseService("reload_calibration", &CyberglovePublisher::reload_calibration, this);
+
   // initialises joint names (the order is important)
   jointstate_msg.name.push_back("G_ThumbRotate");
   jointstate_msg.name.push_back("G_ThumbMPJ");
@@ -189,6 +193,14 @@ void CyberglovePublisher::setPublishing(bool value)
   publishing = value;
 }
 
+bool CyberglovePublisher::reload_calibration(std_srvs::Trigger::Request& request,
+                                             std_srvs::Trigger::Response& response)
+{
+  const std::lock_guard<std::mutex> lock(calib_mutex);
+  response.success = calibration_parser.reload_calibration_from_param();
+  return true;
+}
+
 /////////////////////////////////
 //       CALLBACK METHOD       //
 /////////////////////////////////
@@ -247,9 +259,12 @@ void CyberglovePublisher::glove_callback(std::vector<float> glove_pos, bool ligh
 void CyberglovePublisher::add_jointstate(float position, std::string joint_name)
 {
   // get the calibration value
-  float calibration_value = calibration_parser.get_calibration_value(position, joint_name);
-  // publish the glove position
-  jointstate_msg.position.push_back(calibration_value);
+  {
+    const std::lock_guard<std::mutex> lock(calib_mutex);
+    float calibration_value = calibration_parser.get_calibration_value(position, joint_name);
+    // publish the glove position
+    jointstate_msg.position.push_back(calibration_value);
+  }
   // set velocity to 0.
   // @TODO : send the correct velocity ?
   jointstate_msg.velocity.push_back(0.0);
