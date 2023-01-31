@@ -41,10 +41,18 @@
 #include <string>
 #include <vector>
 
+#ifndef CALIB_LOOKUP_PRECISION
+#define CALIB_LOOKUP_PRECISION   1000.0f
+#endif
+#ifndef CALIB_LOOKUP_OFFSET
+#define CALIB_LOOKUP_OFFSET      1.0
+#endif
+
+
 namespace xml_calibration_parser
 {
-const float XmlCalibrationParser::lookup_precision = 1.0f;
-const float XmlCalibrationParser::lookup_offset = 4096.0f;
+const float XmlCalibrationParser::lookup_precision = CALIB_LOOKUP_PRECISION;
+const float XmlCalibrationParser::lookup_offset = CALIB_LOOKUP_OFFSET;
 
 /*
  * The constructor: parses the given file and stores the calibration

@@ -143,6 +143,11 @@ add_executable(cyberglove_recalib_node
   src/xml_calibration_parser.cpp
 )
 
+target_compile_definitions(cyberglove_recalib_node 
+  PRIVATE CALIB_LOOKUP_PRECISION=1.0f
+          CALIB_LOOKUP_OFFSET=4096.0f
+)
+
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(cyberglove_recalib_node
