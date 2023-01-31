@@ -168,9 +168,9 @@ class Cyberglove:
         """
         Maps the name of the joints to their index in the message
         """
-
-        for index in range(0, len(self.raw_messages[0].name)):
-            self.map[self.raw_messages[0].name[index]] = index
+        if len(self.raw_messages):
+            for index in range(0, len(self.raw_messages[0].name)):
+                self.map[self.raw_messages[0].name[index]] = index
 
     def read_raw_average_value(self, joint_name):
         """
