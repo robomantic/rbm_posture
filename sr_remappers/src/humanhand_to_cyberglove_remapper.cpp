@@ -21,7 +21,7 @@
 * You should have received a copy of the GNU General Public License along
 * with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
- * @brief This program remaps the cyberglove joint information to 
+ * @brief This program remaps the cyberglove joint information to
  * joint_states in of a human hand display
  *
  */
@@ -113,7 +113,7 @@ void HumanhandToCybergloveRemapper::jointstatesCallback( const sensor_msgs::Join
 {
     //Do conversion
     std::vector<double> vect = calibration_parser->get_remapped_vector(msg->position);
-    
+
     // find at which index finger abduction angles are (once)
     if (!finger_abduction_jointnames_found)
     {
@@ -140,7 +140,7 @@ void HumanhandToCybergloveRemapper::jointstatesCallback( const sensor_msgs::Join
     {
         js_msg.position[i] = vect[i] / 180.0 * M_PI; //radians in joint_states
     }
-    
+
     js_msg.header.stamp = ros::Time::now();
     js_pub.publish(js_msg);
 }
@@ -152,7 +152,7 @@ void HumanhandToCybergloveRemapper::getAbductionJoints( const sensor_msgs::Joint
     ROS_WARN_ONCE("No abduction joint data found, abduction remapping will not be computed");
     return;
   }
-  
+
   double middleIndexAb = msg->position[abduction_indices["G_MiddleIndexAb"]];
   double ringMiddleAb = msg->position[abduction_indices["G_RingMiddleAb"]];
   double pinkieRingAb = msg->position[abduction_indices["G_PinkieRingAb"]];
@@ -225,14 +225,14 @@ void HumanhandToCybergloveRemapper::getAbductionJoints( const sensor_msgs::Joint
         //saturate index_abduction_joint to min
         vect[7] = -abduction_max ;
         // then move the other extremity to its max if needed
-        //little_abduction_joint 
+        //little_abduction_joint
         vect[19] = std::min(abduction_max, (middleIndexAb-abduction_max) + ringMiddleAb + pinkieRingAb);
         // average between what middleIndexAb wants and what pinkieRingAb+ringMiddleAb wants
         //ring_abduction_joint
         vect[15] = std::min(vect[19], ((vect[7] + middleIndexAb+ringMiddleAb) + (vect[19] - pinkieRingAb))/2.0);
         //middle_abduction_joint
         vect[11] = std::min(vect[19], ((vect[7] + middleIndexAb) + (vect[19] - pinkieRingAb-ringMiddleAb))/2.0);
-        
+
       }
       else // saturate pinky first
       {
@@ -245,7 +245,7 @@ void HumanhandToCybergloveRemapper::getAbductionJoints( const sensor_msgs::Joint
         vect[11] = std::max(vect[7], ((vect[19] - pinkieRingAb-ringMiddleAb) + (vect[7] + middleIndexAb))/2.0);
         //ring_abduction_joint
         vect[15] = std::max(vect[7], ((vect[19] - pinkieRingAb) + (vect[7] + middleIndexAb+ringMiddleAb))/2.0);
-        
+
       }
     }
   }
