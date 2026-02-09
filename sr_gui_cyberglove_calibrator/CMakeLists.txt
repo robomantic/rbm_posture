@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.22)
 project(sr_gui_cyberglove_calibrator)
 find_package(catkin REQUIRED COMPONENTS rospy rqt_gui rqt_gui_py std_msgs std_srvs)
 
