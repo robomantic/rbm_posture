@@ -18,7 +18,11 @@ import sys
 import rospy
 import unittest
 import rostest
-from StringIO import StringIO
+# https://stackoverflow.com/a/18284900
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
 from mock import patch
 
 from sr_gui_cyberglove_calibrator.cyberglove_calibrer import CybergloveCalibrer
