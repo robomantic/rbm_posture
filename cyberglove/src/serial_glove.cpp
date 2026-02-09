@@ -141,7 +141,7 @@ int CybergloveSerial::start_stream()
 {
   std::cout << "starting stream" << std::endl;
 
-  cereal_port->startReadStream(boost::bind(&CybergloveSerial::stream_callback, this, _1, _2));
+  cereal_port->startReadStream(boost::bind(&CybergloveSerial::stream_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   if ((cyberglove_version_ == "3") && (streaming_protocol_ == "16bit"))
   {
