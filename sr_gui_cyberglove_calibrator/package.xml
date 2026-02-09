@@ -22,9 +22,9 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>cyberglove</run_depend>
-  <run_depend>python-scipy</run_depend>
+  <run_depend>python3-scipy</run_depend>
 
-  <test_depend>python-mock</test_depend>
+  <test_depend>python3-mock</test_depend>
 
 <export>
   <rqt_gui plugin="${prefix}/sr_cyberglove_calibrator_plugin.xml" />
