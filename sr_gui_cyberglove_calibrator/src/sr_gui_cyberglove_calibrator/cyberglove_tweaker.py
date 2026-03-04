@@ -219,7 +219,7 @@ class SrGuiCybergloveJointTweaker(QtWidgets.QWidget):
         position_in_window = (position - lower_bound)/(upper_bound - lower_bound)
         value = (window_index + position_in_window) * range_per_window
 
-        self._progress_bar.setValue(value)
+        self._progress_bar.setValue(int(value))
 
     @QtCore.pyqtSlot()
     def _update_gui(self):
