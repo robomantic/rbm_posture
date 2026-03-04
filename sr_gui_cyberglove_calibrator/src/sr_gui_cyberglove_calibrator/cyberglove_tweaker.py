@@ -339,13 +339,13 @@ class SrGuiCybergloveTweaker(Plugin):
 
     def _make_calibrer(self):
         # read nb_sensors from rosparam or fallback to 22
-        if rospy.has_param('cyberglove/cyberglove_joint_number'):
-            self.nb_sensors = rospy.get_param('cyberglove/cyberglove_joint_number')
+        if rospy.has_param(self.ns + '/cyberglove_joint_number'):
+            self.nb_sensors = rospy.get_param(self.ns + '/cyberglove_joint_number')
         else:
             self.nb_sensors = 22
         # read calibration path
-        if rospy.has_param('cyberglove/path_to_calibration'):
-            self.calib_file = rospy.get_param('cyberglove/path_to_calibration')
+        if rospy.has_param(self.ns + '/path_to_calibration'):
+            self.calib_file = rospy.get_param(self.ns + '/path_to_calibration')
         else:
             self.calib_file = ""
 
@@ -379,10 +379,10 @@ class SrGuiCybergloveTweaker(Plugin):
         else:
             self._calibration_param = "/cyberglove/path_to_calibration"
         '''
-        if rospy.has_param(self.ns + "cyberglove/calibration"):
-            self._calibration_param = self.ns + "cyberglove/calibration"
+        if rospy.has_param(self.ns + "calibration"):
+            self._calibration_param = self.ns + "calibration"
         else:
-            self._calibration_param = "/cyberglove/calibration"
+            self._calibration_param = "calibration"
         self._make_calibrer()
 
         self._make_widget(context)
@@ -391,7 +391,8 @@ class SrGuiCybergloveTweaker(Plugin):
 
         self._widget.setWindowTitle('Cyberglove Calibration Tweaker')
 
-        self._driver_reload_callback = rospy.ServiceProxy(self.ns + self.calib_node_name +"/reload_calibration", Trigger)
+        #self._driver_reload_callback = rospy.ServiceProxy(self.ns + self.calib_node_name +"/reload_calibration", Trigger)
+        self._driver_reload_callback = rospy.ServiceProxy(self.ns + "reload_calibration", Trigger)
 
     def _make_buttons(self):
         btn_frame = QtWidgets.QFrame()
