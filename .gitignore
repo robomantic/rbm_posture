@@ -30,3 +30,38 @@
 *.exe
 *.out
 *.app
+
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Catkin / ROS generated
+build/
+devel/
+install/
+logs/
+log/
+
+# Editor / OS
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Local calibration backups / recovery artefacts
+*.cal.bak
+*.cal.bak-*
+*.recovered.cal
+.posture_calibration_history.jsonl
+
+# Runtime / experiment artefacts
+*.bag
+*.bag.active
+*.bag.orig
+*.log
+
+# Local installer backups
+*.pre-delta*
+*.bak-delta*
